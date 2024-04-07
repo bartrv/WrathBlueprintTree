@@ -82,7 +82,6 @@ public class BlueprintObject
 			}
 			Console.WriteLine(mValueFuncText);
             if (currentBranchStruct.Count == 1){
-                //this.bpData[keyBranchToInit[0]] = "";
                 this.bpData[currentBranchStruct[0]] = valueToInsert ?? "";
             } else {
                 //Dictionary<string,dynamic> tempBpDict = this.bpData;
@@ -128,7 +127,6 @@ public class BlueprintObject
 				string twig = currentBranchStruct[0];
 				//Type NestType = tempBpDict[currentBranchStruct[0]].GetType();
 				foreach (string twigItem in currentBranchStruct){
-					//k++;
 					if (twigItem != currentBranchStruct.Last()){
 						int tempInt = 0;
 						tempBpDict = (int.TryParse(twigItem, out tempInt)) ? tempBpDict[tempInt] : tempBpDict[twigItem]; //if a number is returned, its a List - use [int.number]
@@ -172,8 +170,6 @@ public class BlueprintObject
 					int tempInt = 0;
 					seedFuncString += (int.TryParse(twigItem, out tempInt)) ? $"[{tempInt}]" : $".{twigItem}"; //build representitive parse string for debugging purposes
 					tempBpDict = (int.TryParse(twigItem, out tempInt)) ? tempBpDict[tempInt] : tempBpDict[twigItem]; //if a number is returned, its a List - use [int.number]
-					//seedFuncString += (int.TryParse(twigItem, out _)) ? $"[{twigItem}]" : $".{twigItem}"; //build representitive parse string for debugging purposes
-					//twig = twigItem;
 				}
 				twig = twigItem;
 			}
@@ -288,7 +284,6 @@ public class BlueprintObject
 								this.SetBPValue(currentStringAsFloat, this.treeBranch);
 							}
 							
-							//this.SetBPValue(currentString, this.treeBranch);
 						} else if (thisChar == '{'){
 							int tempTryParse = 0;
 							if (int.TryParse(this.nestDepth[this.nestDepth.Count-2].ToString(), out tempTryParse)) { //if there is a number, it is a [] index
