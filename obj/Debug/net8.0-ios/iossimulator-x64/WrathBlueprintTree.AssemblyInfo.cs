@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WrathBlueprintTree")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+3e7ee671c802937ca9b8ed98f7bb1c24fe10ef25")]
 [assembly: System.Reflection.AssemblyProductAttribute("WrathBlueprintTree")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WrathBlueprintTree")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
