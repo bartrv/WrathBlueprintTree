@@ -1,3 +1,5 @@
+//using CoreImage;
+
 namespace WrathBlueprintTree;
 public class BlueprintObject
 	{
@@ -105,6 +107,8 @@ public class BlueprintObject
 				//if (tempListIndex == -1){
 				if (!int.TryParse(currentBranchStruct[k], out _)){
                 	tempBpDict[currentBranchStruct[k]] = valueToInsert ?? "";
+				} else if (int.TryParse(currentBranchStruct.Last(), out _)) {
+					tempBpDict.Add(valueToInsert);
 				} else {
 					tempBpDict[tempListIndex] = valueToInsert ?? "";
 				}
@@ -123,11 +127,13 @@ public class BlueprintObject
 			int initCursor = this.charIndex;
 
 				dynamic tempBpDict = this.bpData;
-                //int k = -1;
+                int k = 0;
 				string twig = currentBranchStruct[0];
 				//Type NestType = tempBpDict[currentBranchStruct[0]].GetType();
 				foreach (string twigItem in currentBranchStruct){
-					if (twigItem != currentBranchStruct.Last()){
+					k++;
+					//if (twigItem != currentBranchStruct.Last()){  //if keys of same name as last item, could skip a loop
+					if (k < currentBranchStruct.Count()){ 
 						int tempInt = 0;
 						tempBpDict = (int.TryParse(twigItem, out tempInt)) ? tempBpDict[tempInt] : tempBpDict[twigItem]; //if a number is returned, its a List - use [int.number]
 						//twig = twigItem;
@@ -204,8 +210,22 @@ public class BlueprintObject
 						if (this.nestDepth.Last() == "{"){
 							Console.WriteLine(String.Join(".",this.treeBranch) + ": " + currentString);
 							this.SetBPValue(currentString, this.treeBranch);
-						} else {
+						} else if (this.nestDepth.Last() == "-1"){
+							this.nestDepth[this.nestDepth.Count()-1] = "0";
+							if (this.treeBranch.Count() < this.nestDepth.Count()){
+								this.treeBranch.Add(this.nestDepth.Last());
+							} else if (this.treeBranch.Count() == this.nestDepth.Count()){
+								this.treeBranch[this.treeBranch.Count()-1]=(this.nestDepth.Last());
+							}
 							Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
+							this.SetBPValue(currentString, this.treeBranch);
+						} else if (int.TryParse(this.nestDepth.Last(), out _)){
+							this.nestDepth[this.nestDepth.Count()-1] = $"{int.Parse(this.nestDepth.Last())+1}";
+							if (this.treeBranch.Count() == this.nestDepth.Count()){
+								this.treeBranch[this.treeBranch.Count()-1]=(this.nestDepth.Last());
+							}
+							Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
+							this.SetBPValue(currentString, this.treeBranch);
 						}
 					} else if (this.entryType == "Key") {
 						if (this.nestDepth.Count == 1){
@@ -275,7 +295,8 @@ public class BlueprintObject
 						} else if (int.TryParse(thisChar.ToString(), out _) || int.TryParse(thisChar.ToString()+ this.rawText[this.charIndex+1], out _)){
 							currentString = this.BuildNumber();
 							if (!currentString.Contains(".")){
-								int CurrentStringAsInt = int.Parse(currentString);
+								//int CurrentStringAsInt = int.Parse(currentString);
+								long CurrentStringAsInt = long.Parse(currentString);
 								Console.WriteLine("Num Value:" + CurrentStringAsInt.ToString());
 								this.SetBPValue(CurrentStringAsInt, this.treeBranch);
 							} else {
