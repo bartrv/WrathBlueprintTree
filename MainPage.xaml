@@ -1,7 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="WrathBlueprintTree.MainPage">
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             x:Class="WrathBlueprintTree.MainPage"
+             x:Name="this">
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="File" BindingContext="{Binding Path=BindingContext,Source={x:Reference this}}">
+            <MenuFlyoutItem Text="Open" Clicked="MenuBarFileOpen" />
+
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
 
     <ScrollView>
         <VerticalStackLayout
@@ -38,7 +46,6 @@
                 x:Name="CounterBtn"
                 Text="Click me" 
                 SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OpenFile_Bp"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>

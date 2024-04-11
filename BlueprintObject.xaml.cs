@@ -28,7 +28,7 @@ public class BlueprintObject
 			this.MainLoop();
 			
 		}
-	
+		
 		private string BuildString()
 		{
 			string currentString = "";

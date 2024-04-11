@@ -1,12 +1,28 @@
 using Microsoft.Extensions.Logging;
 using System.IO;
+using System.Net.Cache;
+using System.Runtime.CompilerServices;
 
 namespace WrathBlueprintTree;
 
-
+public class LastFilePath()
+{   
+    string lastPath = "C:\\Users";
+    public void SetPath (string req){
+        if (req !=""){
+            this.lastPath = req;
+        }
+    }
+    public string GetPath (){
+        return lastPath;
+    }
+}
 public partial class BpFile{
-
-    private readonly static FilePickerFileType customFileType = new FilePickerFileType(
+    public static string OpenFile(object sender, EventArgs e)
+	{
+		FileResult myFileResult = null;
+		string fileData = "none";
+		FilePickerFileType customFileType = new FilePickerFileType(
                     new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
                         { DevicePlatform.iOS, new[] { "public.text.json" } }, // UTType values
@@ -15,50 +31,30 @@ public partial class BpFile{
                         { DevicePlatform.Tizen, new[] { "*/*" } },
                         { DevicePlatform.macOS, new[] { "txt", "bp", "json" } }, // UTType values
                     });
+		PickOptions options = new() { PickerTitle = "Blueprint", FileTypes = customFileType, };
 
-    
-
-    //public static async Task<FileResult> PickAndShow(PickOptions options)
-    public static async Task<List<string>> OpenBpFile()
-    {
-        string fileData = "";
-        PickOptions options = new() { PickerTitle = "Please select a blueprint file", FileTypes = customFileType, };
-        try
+        Task.Run(async () =>
         {
-            //this hangs here, once the file picker is used to select a file
-            var result = await FilePicker.PickAsync(options);
-            
-            if (result != null)
-            {
-                if (result.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
-                    result.FileName.EndsWith(".bp", StringComparison.OrdinalIgnoreCase) ||
-                    result.FileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                {
+            myFileResult = await FilePicker.PickAsync(options);
+        }).Wait();
 
-                    using (StreamReader sr = File.OpenText(result.FullPath))
-                    {
-                        var s = (string)"";
-                        while ((s = sr.ReadLine()) != null)
-                        {
-                            Console.WriteLine(s);
-                            fileData += s;
-                        }
-                    }
-                }
-            
-            var thisFullPath = (result.FullPath != null) ? result.FullPath : "Error: null path";
-            return (List<string>)[fileData,result.FullPath];
-            }
-        }
-        catch (Exception ex)
+        if (myFileResult != null)
         {
-            // The user canceled or something went wrong
-            Console.WriteLine(ex);
-            return (List<string>)["None","File Picker Exited, User canceled"];
+			string pathOnly = myFileResult.FullPath[..(myFileResult.FullPath.Length - myFileResult.FileName.Length)];
+			using (StreamReader sr = File.OpenText(myFileResult.FullPath))
+				{
+					var s = (string)"";
+					while ((s = sr.ReadLine()) != null)
+					{
+						Console.WriteLine(s);
+						fileData += "\r"+s;
+					}
+				}
+			var bpObject = new BlueprintObject(fileData);
+            return fileData;
         }
-
-        return (List<string>)["None","Error on file picker"];
-    }
+        return "none";
+	}
     
 }
 
