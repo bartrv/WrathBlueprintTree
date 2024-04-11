@@ -16,6 +16,7 @@ public static class MauiProgram
 			});
 			//builder.Services.AddTransient<MainPage>();
 			builder.Services.AddTransient<BlueprintObject>();
+			builder.Services.AddTransient<BpFile>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

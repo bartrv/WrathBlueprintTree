@@ -1,5 +1,7 @@
 //using CoreImage;
 
+using Microsoft.Maui.Controls.Platform.Compatibility;
+
 namespace WrathBlueprintTree;
 public class BlueprintObject
 	{
@@ -104,7 +106,16 @@ public class BlueprintObject
 					//tempBpDict = tempBpDict[currentBranchStruct[k]];
                 }
 
-				//if (tempListIndex == -1){
+				switch (valueToInsert){
+					case "true":
+					case "True":
+						valueToInsert = (bool)true;
+						break;
+					case "false":
+					case "False":
+						valueToInsert = (bool)false;
+						break;
+				}
 				if (!int.TryParse(currentBranchStruct[k], out _)){
                 	tempBpDict[currentBranchStruct[k]] = valueToInsert ?? "";
 				} else if (int.TryParse(currentBranchStruct.Last(), out _)) {
@@ -157,7 +168,7 @@ public class BlueprintObject
 						break;
 					}
 				}
-			Console.WriteLine(branchString);
+			//Console.WriteLine(branchString);
 			this.entryType = "Value";
 			return branchString;
 		}
@@ -198,7 +209,7 @@ public class BlueprintObject
 		private void MainLoop(){
 			while (this.charIndex < this.rawLength-1){
 				this.charIndex++;
-				if (this.charIndex == this.rawLength-2) {
+				if (this.charIndex == this.rawLength-3) {
 					/*Pause here to check final bpData object*/
 					}
 				char thisChar = this.rawText[this.charIndex];
@@ -208,7 +219,7 @@ public class BlueprintObject
 					currentString = this.BuildString();
 					if (this.entryType == "Value") {
 						if (this.nestDepth.Last() == "{"){
-							Console.WriteLine(String.Join(".",this.treeBranch) + ": " + currentString);
+							//Console.WriteLine(String.Join(".",this.treeBranch) + ": " + currentString);
 							this.SetBPValue(currentString, this.treeBranch);
 						} else if (this.nestDepth.Last() == "-1"){
 							this.nestDepth[this.nestDepth.Count()-1] = "0";
@@ -217,14 +228,14 @@ public class BlueprintObject
 							} else if (this.treeBranch.Count() == this.nestDepth.Count()){
 								this.treeBranch[this.treeBranch.Count()-1]=(this.nestDepth.Last());
 							}
-							Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
+							//Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
 							this.SetBPValue(currentString, this.treeBranch);
 						} else if (int.TryParse(this.nestDepth.Last(), out _)){
 							this.nestDepth[this.nestDepth.Count()-1] = $"{int.Parse(this.nestDepth.Last())+1}";
 							if (this.treeBranch.Count() == this.nestDepth.Count()){
 								this.treeBranch[this.treeBranch.Count()-1]=(this.nestDepth.Last());
 							}
-							Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
+							//Console.WriteLine(String.Join(".",this.treeBranch) + "Append-> " + currentString); //This may be an unnecessaty check
 							this.SetBPValue(currentString, this.treeBranch);
 						}
 					} else if (this.entryType == "Key") {
@@ -237,7 +248,7 @@ public class BlueprintObject
 							this.treeBranch.Add(currentString);
 						}
 						this.InitBPKey(this.treeBranch);
-						Console.WriteLine("Branch: "+String.Join(".",this.treeBranch));
+						//Console.WriteLine("Branch: "+String.Join(".",this.treeBranch));
 						this.entryType = "Value";
 					}
 				} else if (thisChar != ' ' && thisChar != '\n' && thisChar != ',' && thisChar != '\r'){
@@ -260,8 +271,10 @@ public class BlueprintObject
 							this.entryType = "Key";
 							break;
 						case '}': 
-							this.nestDepth.RemoveAt(this.nestDepth.Count-1);
-							this.treeBranch.RemoveAt(this.treeBranch.Count-1);
+							if (this.nestDepth.Count>0) {
+								this.nestDepth.RemoveAt(this.nestDepth.Count-1);
+								this.treeBranch.RemoveAt(this.treeBranch.Count-1);
+							}
                             if (this.nestDepth.Count>0) { 
                                 this.entryType = (this.nestDepth.Last() == "{") ? "Key" : "Value";
                             }
