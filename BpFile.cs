@@ -18,10 +18,10 @@ public class LastFilePath()
     }
 }
 public partial class BpFile{
-    public static string OpenFile(object sender, EventArgs e)
+    public static (string,string) Open(object sender, EventArgs e)
 	{
 		FileResult myFileResult = null;
-		string fileData = "none";
+		string fileData = "";
 		FilePickerFileType customFileType = new FilePickerFileType(
                     new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
@@ -50,10 +50,10 @@ public partial class BpFile{
 						fileData += "\r"+s;
 					}
 				}
-			var bpObject = new BlueprintObject(fileData);
-            return fileData;
+			//var bpObject = new BlueprintObject(fileData);
+            return ((string)fileData, (string)myFileResult.FullPath);
         }
-        return "none";
+        return ("none","none");
 	}
     
 }

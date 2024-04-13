@@ -5,6 +5,7 @@ public partial class MainPage : ContentPage
 {
 	int count = 0;
 	LastFilePath LastBPFilePath = new LastFilePath();
+	object bpObject = new Dictionary<string,dynamic>{};
 
 	public MainPage()
 	{
@@ -17,25 +18,26 @@ public partial class MainPage : ContentPage
 	{
 		count++;
 		Console.WriteLine();
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
+		//if (count == 1)
+		//	CounterBtn.Text = $"Clicked {count} time";
+		//else
+		//	CounterBtn.Text = $"Clicked {count} times";
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
+		//SemanticScreenReader.Announce(CounterBtn.Text);
 
-		var bpObject = new BlueprintObject(editor.Text);
+		//var bpObject = new BlueprintObject(editor.Text);
 	}
 
 	public void MenuBarFileOpen(object sender, System.EventArgs e)
 	//async void MenuTesting(object sender, System.EventArgs e)
 	{
 		//OpenFile_Bp(sender, e);
-		string thePath = BpFile.OpenFile(sender, e);
-		editor.Text = thePath;
+		var (RawFileText, fileFullPath) = BpFile.Open(sender, e);
+		editor.Text = RawFileText;
+		bpFilePath.Text = fileFullPath;
+		bpObject = new BlueprintObject(RawFileText);
 		//await DisplayAlert("Alert", "You have been alerted", "OK");
 	}
-
 
 	void OnEditorTextChanged(object sender, TextChangedEventArgs e)
 	{
@@ -45,5 +47,10 @@ public partial class MainPage : ContentPage
 		Console.WriteLine(currentText.Length);
 	}
 	
+	void RunBpDotTrace(object sender, TextChangedEventArgs e)
+	{
+		string text = ((Entry)sender).Text;
+		//ToDo - converts bpData dot syntax result to text/string and dumps it into a multi-line text box (editor?) 
+	}
 }
 
