@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- Title in nav bar set Here: ContentPage-> Title="new title" !!NOT x:Title=!! *OR* in AppShell.Xaml in its ShellContent Declaration -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:sys="clr-namespace:System;assembly=netstandard"
@@ -16,14 +17,12 @@
             Padding="30,0"
             Spacing="25">
             <ScrollView x:Name="scrollView" HeightRequest="360" WidthRequest="960" Orientation="Both" HorizontalScrollBarVisibility="Always" VerticalScrollBarVisibility="Always">
-
                     <Editor x:Name="editor"
                         Text=""
                         Placeholder="Enter your response here"
                         WidthRequest ="2048"
                         AutoSize="TextChanges"
                         TextChanged="OnEditorTextChanged" />
-
             </ScrollView>
             <Label
                 Text="Temp Text Testing BP deserialization"

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
+//using Microsoft.UI.Windowing;
+//using Microsoft.UI.Xaml;
 namespace WrathBlueprintTree;
 
 public partial class MainPage : ContentPage
@@ -12,6 +14,8 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 		this.BindingContext = this; // set the bindingContext to the page itself
 		LastBPFilePath.SetPath("C:\\Users"); //File Picker has Documents folder hard coded in the Maui Library.... WTF
+		//Title = Set in AppShell.xaml
+		//Page title (in menu bar) ALSO set in AppShell.xaml
 	}
 
 	private void OnCounterClicked(object sender, EventArgs e)

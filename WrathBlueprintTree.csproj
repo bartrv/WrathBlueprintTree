@@ -21,7 +21,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>WrathBlueprintTree</ApplicationTitle>
+		<ApplicationTitle>Wrath Blueprint Tree Builder</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.wrathblueprinttree</ApplicationId>
