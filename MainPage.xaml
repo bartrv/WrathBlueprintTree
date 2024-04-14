@@ -35,12 +35,12 @@
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
 
-            <Label x:Name="bpFilePath" WidthRequest="800" Text="File Path..." />
+            <Entry x:Name="bpFilePath" WidthRequest="800" IsReadOnly="true" Text="File Path..." />
 
-            <!-- <Entry x:Name="bpObjectTrace"
+            <Entry x:Name="Entry_bpObjectTrace"
                 Placeholder="Enter Blueprint Dot referance"
-                Completed="RunBpDotTrace"
-                WidthRequest="800" />-->
+                TextChanged="RunBpDotTrace"
+                WidthRequest="800" />
         </VerticalStackLayout>
     </ScrollView>
 

@@ -7,9 +7,24 @@
     Shell.FlyoutBehavior="Disabled"
     Title="Wrath Blueprint Tree Builder">
 
-    <ShellContent
+    <!--<ShellContent
         Title=""
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    -->
+    <TabBar>
+       <!--<Tab Title="Moon Phase" Icon="moon.png">
+           <ShellContent ContentTemplate="{DataTemplate local:MoonPhasePage}" />
+       </Tab>
+       <Tab Title="Sunrise" Icon="sun.png">
+           <ShellContent ContentTemplate="{DataTemplate local:SunrisePage}" />
+       </Tab>-->
+       <Tab Title="Json">
+           <ShellContent Title="Json" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
+       </Tab>
+       <Tab Title="Tree">
+           <ShellContent Title="Tree" ContentTemplate="{DataTemplate local:TreePage}" Route="TreePage" />
+       </Tab>
+    </TabBar>
 
 </Shell>

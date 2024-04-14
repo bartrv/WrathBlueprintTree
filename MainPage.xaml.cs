@@ -8,7 +8,7 @@ public partial class MainPage : ContentPage
 	int count = 0;
 	LastFilePath LastBPFilePath = new LastFilePath();
 	object bpObject = new Dictionary<string,dynamic>{};
-
+	bool bpAvailable = false;
 	public MainPage()
 	{
 		InitializeComponent();
@@ -40,6 +40,9 @@ public partial class MainPage : ContentPage
 		editor.Text = RawFileText;
 		bpFilePath.Text = fileFullPath;
 		bpObject = new BlueprintObject(RawFileText);
+		if (bpObject is WrathBlueprintTree.BlueprintObject){
+			bpAvailable = true;
+		}
 		//await DisplayAlert("Alert", "You have been alerted", "OK");
 	}
 
@@ -51,9 +54,14 @@ public partial class MainPage : ContentPage
 		Console.WriteLine(currentText.Length);
 	}
 	
-	void RunBpDotTrace(object sender, TextChangedEventArgs e)
+	public void RunBpDotTrace(object sender, TextChangedEventArgs e)
 	{
 		string text = ((Entry)sender).Text;
+		//Console.WriteLine(text);
+		//Console.WriteLine("bpObject = "+bpObject);
+		if (bpAvailable){
+			Console.WriteLine(text);
+		}
 		//ToDo - converts bpData dot syntax result to text/string and dumps it into a multi-line text box (editor?) 
 	}
 }

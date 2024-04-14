@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- Title in nav bar set Here: ContentPage-> Title="new title" !!NOT x:Title=!! *OR* in AppShell.Xaml in its ShellContent Declaration -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             x:Class="WrathBlueprintTree.TreePage"
+             x:Name="thisTreePage">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="220" />
+            </Grid.ColumnDefinitions>
+            <ScrollView Grid.Column="0" x:Name="treeScrollSelect" VerticalOptions="FillAndExpand" WidthRequest="220" Orientation="Vertical" VerticalScrollBarVisibility="Always">
+                    <VerticalStackLayout x:Name="treeDragListA">
+                    <!-- AutoFilled with Code Behind -->
+                    </VerticalStackLayout>
+            </ScrollView>
+            
+            <ScrollView Grid.Column="1" x:Name="treeScrollView" 
+                VerticalOptions="FillAndExpand" 
+                HorizontalOptions="FillAndExpand" 
+                Orientation="Both" 
+                HorizontalScrollBarVisibility="Always" 
+                VerticalScrollBarVisibility="Always"
+                BackgroundColor="#DDDDDD">
+                <ScrollView.GestureRecognizers>
+                    <DropGestureRecognizer Drop="OnDropBpOption"/>
+                </ScrollView.GestureRecognizers>
+
+            </ScrollView>
+
+              <ScrollView Grid.Column="2" x:Name="treeScrollEdit" 
+                VerticalOptions="FillAndExpand" WidthRequest="220" 
+                Orientation="Vertical" 
+                VerticalScrollBarVisibility="Always"
+                BackgroundColor="#BBBBBB">
+            
+            </ScrollView>
+
+        </Grid>
+
+</ContentPage>
