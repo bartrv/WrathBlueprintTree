@@ -25,9 +25,14 @@
                 HorizontalScrollBarVisibility="Always" 
                 VerticalScrollBarVisibility="Always"
                 BackgroundColor="#DDDDDD">
-                <ScrollView.GestureRecognizers>
-                    <DropGestureRecognizer Drop="OnDropBpOption"/>
-                </ScrollView.GestureRecognizers>
+                <AbsoluteLayout x:Name="TreeDropContainer">
+                
+                    <AbsoluteLayout.GestureRecognizers>
+                        <DropGestureRecognizer Drop="OnDropIntoTreeLayout"/>
+                        <PointerGestureRecognizer PointerMoved="OnPointerMovedInTreeView" />
+                        <!--<TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>-->
+                    </AbsoluteLayout.GestureRecognizers>
+                </AbsoluteLayout>
 
             </ScrollView>
 
@@ -35,10 +40,8 @@
                 VerticalOptions="FillAndExpand" WidthRequest="220" 
                 Orientation="Vertical" 
                 VerticalScrollBarVisibility="Always"
-                BackgroundColor="#BBBBBB">
-            
+                BackgroundColor="#BBBBBB">            
             </ScrollView>
-
         </Grid>
 
 </ContentPage>
