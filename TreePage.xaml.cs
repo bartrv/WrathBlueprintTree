@@ -1,19 +1,38 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Windows.Input;
+using Microsoft.Extensions.Options;
+using Microsoft.UI.Xaml.Controls.Primitives;
 //using Microsoft.UI.Windowing;
 //using Microsoft.UI.Xaml;
 namespace WrathBlueprintTree;
 
 public partial class TreePage : ContentPage
 {
-	
+	Dictionary<string,string> ButtonList = [];
 	public TreePage()
 	{
 		InitializeComponent();
         //Button buttonAA = new Button {Text = "Button text"};
         int btnI = 0;
         int ButtonCount = 12;
-        for (; btnI < ButtonCount; btnI++){
-			Frame newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
+		//var tempGuid = Guid.Parse("<guidValue>");  // Parse a known guid to guid object
+		//var Guid id = Guid.NewGuid();					// Generate a new Guid Object with a random guid, works with .ToString() to convert to a string, yields n-n-n-n-n format
+		
+		// Generate test data for buttons
+
+		for (int b=0; b < ButtonCount; b++)
+		{
+			string stringGuid = Guid.NewGuid().ToString();
+			string bpGuid = "";
+			foreach (char c in stringGuid) bpGuid += (c is not '-') ? c : "" ;
+			ButtonList[bpGuid] = $"BlueprintType: {b}";
+		}
+		
+		Console.WriteLine(ButtonList);
+
+        //for (; btnI < ButtonCount; btnI++){
+			foreach (KeyValuePair<string, string> entry in ButtonList)
+			{
+			var newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
 										CornerRadius = 3,
@@ -22,16 +41,24 @@ public partial class TreePage : ContentPage
 										VerticalOptions = LayoutOptions.Center,
 										HorizontalOptions = LayoutOptions.Center
 									};
-			DragGestureRecognizer DragFrame = new DragGestureRecognizer{};
-			DragFrame.CanDrag = true;
-			newFrame.GestureRecognizers.Add(DragFrame);
-			Label frameLabel = new Label{Text = $"Button text: {btnI}", 
+            
+			Label frameLabel = new Label{Text = entry.Value, 
 										FontSize = 12, 
 										Margin =  new Thickness(0,0), 
 										HorizontalTextAlignment = TextAlignment.Center,
 										VerticalTextAlignment = TextAlignment.Center
 									};
+			
 			newFrame.Content = frameLabel;
+
+			DragGestureRecognizer DragFrame = new()
+            {
+                CanDrag = true
+            };
+			//DragFrame.DragStarting += OnDragStarting; - with a little explanation of the DragStarting notation from ChatGPT 
+			DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, entry.Key as string); // final suggestion from Chat
+			newFrame.GestureRecognizers.Add(DragFrame);
+			
             treeDragListA.Add(newFrame);
         }   
 	}
@@ -43,16 +70,19 @@ public partial class TreePage : ContentPage
 		Console.WriteLine(relativeToContainerPosition);
 	}
 
-	public void OnDragHandler(object sender, DragEventArgs e)
-	{
-		relativeToContainerPosition = e.GetPosition((View)sender);
-		Console.WriteLine(relativeToContainerPosition);
+	public void OnDragStarting(object? sender, DragStartingEventArgs e, string listItemBpGuid)
+        {
+            Console.WriteLine($"Frame dragged! : {listItemBpGuid}");
+			e.Data.Text = listItemBpGuid;
+        }
 
-	}
-	public void OnDropIntoTreeLayout(object sender, DropEventArgs e)
+	public async void OnDropIntoTreeLayout(object sender, DropEventArgs e)
 	{
+		string listItemBpGuid = await e.Data.GetTextAsync();
 		Console.WriteLine(sender.ToString());
 		Console.WriteLine(e.ToString());
+		Console.WriteLine($"listItemBpGuid: {listItemBpGuid}");
+		Console.WriteLine($"listItemBpName: {ButtonList[listItemBpGuid]}");
 		Console.WriteLine((sender as Element)?.Parent as AbsoluteLayout);
 		AbsoluteLayout senderParent = (sender as Element)?.Parent as AbsoluteLayout;
 		//Console.WriteLine((sender);
@@ -62,13 +92,13 @@ public partial class TreePage : ContentPage
 			Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
 			Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
 		//}
-		placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, "TestData Keyed");
+		placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, listItemBpGuid);
 		// Perform logic to take action based on retrieved value.
 	}
 
-	public void placeNewBpTemplateFrame(AbsoluteLayout targetParent, Point? dropPosition, string dropData)
+	public void placeNewBpTemplateFrame(AbsoluteLayout targetParent, Point? dropPosition, string listItemBpGuid)
 	{
-		Frame newBpFrame = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"),
+		/*Frame newBpFrame = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"),
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
 										CornerRadius = 3,
@@ -78,18 +108,74 @@ public partial class TreePage : ContentPage
 										//HorizontalOptions = LayoutOptions.Left
 									};
 		//newBpFrame.AbsoluteLayout.LayoutBoundsProperty=(5,5,50,50);
-
-		Label newBpframeLabel = new Label{Text = $"Data text: {dropData}", 
+		Label newBpframeLabel = new Label{Text = $"Data text: {listItemBpGuid}", 
 										FontSize = 12, 
 										Margin =  new Thickness(0,0), 
 										HorizontalTextAlignment = TextAlignment.Center,
 										VerticalTextAlignment = TextAlignment.Center
 									};
 		newBpFrame.Content = newBpframeLabel;
-		AbsoluteLayout.SetLayoutBounds(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
-        //AbsoluteLayout.SetLayoutFlags(newBpFrame, AbsoluteLayoutFlags.PositionProportional);
-		//targetParent.Add(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
-		targetParent.Add(newBpFrame);
+		//AbsoluteLayout.SetLayoutBounds(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
+		*/
+		Frame newGenFrame = GenerateNewBpTemplateFrame(listItemBpGuid);
+		AbsoluteLayout.SetLayoutBounds(newGenFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
+        //x AbsoluteLayout.SetLayoutFlags(newBpFrame, AbsoluteLayoutFlags.PositionProportional);
+		//x targetParent.Add(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
+		//targetParent.Add(newBpFrame);
+		targetParent.Add(newGenFrame);
+	}
+
+	public Frame GenerateNewBpTemplateFrame(string listItemBpGuid)
+	{
+		//var dropData = "testData";
+		int testWidth = 200;
+		int testHeight = 400;
+		Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+										Margin = new Thickness(0,2),
+										Padding = new Thickness(0,0),
+										CornerRadius = 0
+										};
+		AbsoluteLayout bpFrameContainerAbsLayout = [];
+		
+		BoxView bpNode = new BoxView{BackgroundColor = Color.FromRgba("#EEFFEEFF"),
+						Margin = new Thickness (0,0),
+						//WidthRequest = 16,
+						//HeightRequest = 16,
+						CornerRadius = 8
+						};
+		AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(testWidth-20,28,16,16));
+
+		Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+										Margin = new Thickness(0,2),
+										Padding = new Thickness(0,0),
+										CornerRadius = 3
+										};
+		AbsoluteLayout.SetLayoutBounds(bpFrameVisualMain, new Rect(10,0,testWidth-20,testHeight-4));
+
+		VerticalStackLayout bpFrameVisualMainVertLayout = [];
+
+		
+		Label bpframeLabel = new Label{Text = $"Label Text: {ButtonList[listItemBpGuid]}", 
+										FontSize = 12, 
+										Margin =  new Thickness(0,0), 
+										HorizontalTextAlignment = TextAlignment.Center,
+										VerticalTextAlignment = TextAlignment.Start
+									};
+		Label bpframeLineItem = new Label{Text = $"Line Item: {listItemBpGuid}", 
+										FontSize = 10, 
+										Margin =  new Thickness(0,0), 
+										HorizontalTextAlignment = TextAlignment.Start,
+										VerticalTextAlignment = TextAlignment.Start
+									};
+		bpFrameVisualMainVertLayout.Add(bpframeLabel);		
+		bpFrameVisualMainVertLayout.Add(bpframeLineItem);
+		bpFrameVisualMain.Content = bpFrameVisualMainVertLayout;
+
+		bpFrameContainerAbsLayout.Add(bpFrameVisualMain);
+		bpFrameContainerAbsLayout.Add(bpNode);
+		bpFrameContainer.Content = bpFrameContainerAbsLayout;
+		return bpFrameContainer;
+		
 	}
 }
 
