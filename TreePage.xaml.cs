@@ -87,21 +87,22 @@ public partial class TreePage : ContentPage
 		Console.WriteLine($"bpModelKey: {bpModelKey}");
 		object bpModelReferanceObject;
 		if (BlueprintModels.checkBpModel(bpModelKey, out bpModelReferanceObject)){
-			if (bpModelReferanceObject is Dictionary<string,dynamic> useableDictionary)
-			{
-				Console.WriteLine($"bpModel $type: {useableDictionary["$type"]}");
-			}
+			Dictionary<string,dynamic> bpModelDictionary = (Dictionary<string,dynamic>)bpModelReferanceObject;
+
+			Console.WriteLine($"bpModel $type: {bpModelDictionary["$type"]}");
+			Console.WriteLine((sender as Element)?.Parent as AbsoluteLayout);
+			AbsoluteLayout senderParent = (sender as Element)?.Parent as AbsoluteLayout;
+			//Console.WriteLine((sender);
+			//relativeToContainerPosition = e.GetPosition(treeScrollView);
+			relativeToContainerPosition = e.GetPosition((sender as Element)?.Parent);
+			//if (relativeToContainerPosition!=null){
+				Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
+				Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
+			//}
+			placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, bpModelKey);
+		} else {
+			Console.WriteLine("Exception!! BlueprintModels Dictionaty key not found, this should be immpossible. TreePage.OnDropIntoTreeLayout");
 		}
-		Console.WriteLine((sender as Element)?.Parent as AbsoluteLayout);
-		AbsoluteLayout senderParent = (sender as Element)?.Parent as AbsoluteLayout;
-		//Console.WriteLine((sender);
-		//relativeToContainerPosition = e.GetPosition(treeScrollView);
-		relativeToContainerPosition = e.GetPosition((sender as Element)?.Parent);
-		//if (relativeToContainerPosition!=null){
-			Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
-			Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
-		//}
-		placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, bpModelKey);
 		// Perform logic to take action based on retrieved value.
 	}
 
