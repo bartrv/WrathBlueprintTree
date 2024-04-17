@@ -13,25 +13,28 @@ public partial class TreePage : ContentPage
 		InitializeComponent();
         //Button buttonAA = new Button {Text = "Button text"};
         int btnI = 0;
-        int ButtonCount = 12;
+        int ButtonCount = BlueprintModels.ModelDictionary.Count;
+		
 		//var tempGuid = Guid.Parse("<guidValue>");  // Parse a known guid to guid object
 		//var Guid id = Guid.NewGuid();					// Generate a new Guid Object with a random guid, works with .ToString() to convert to a string, yields n-n-n-n-n format
 		
 		// Generate test data for buttons
-
-		for (int b=0; b < ButtonCount; b++)
+		/*for (int b=0; b < ButtonCount; b++)
 		{
 			string stringGuid = Guid.NewGuid().ToString();
 			string bpGuid = "";
 			foreach (char c in stringGuid) bpGuid += (c is not '-') ? c : "" ;
 			ButtonList[bpGuid] = $"BlueprintType: {b}";
-		}
+		}*/
 		
-		Console.WriteLine(ButtonList);
+		//Generate Buttons From Entire List
+		
+		//Console.WriteLine(ButtonList);
 
         //for (; btnI < ButtonCount; btnI++){
-			foreach (KeyValuePair<string, string> entry in ButtonList)
-			{
+		//foreach (KeyValuePair<string, string> entry in ButtonList)
+		foreach (KeyValuePair<string, dynamic> entry in BlueprintModels.ModelDictionary)
+		{
 			var newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
@@ -42,7 +45,7 @@ public partial class TreePage : ContentPage
 										HorizontalOptions = LayoutOptions.Center
 									};
             
-			Label frameLabel = new Label{Text = entry.Value, 
+			Label frameLabel = new Label{Text = entry.Value["buttonName"], 
 										FontSize = 12, 
 										Margin =  new Thickness(0,0), 
 										HorizontalTextAlignment = TextAlignment.Center,
@@ -56,7 +59,7 @@ public partial class TreePage : ContentPage
                 CanDrag = true
             };
 			//DragFrame.DragStarting += OnDragStarting; - with a little explanation of the DragStarting notation from ChatGPT 
-			DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, entry.Key as string); // final suggestion from Chat
+			DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, entry.Key); // final suggestion from Chat
 			newFrame.GestureRecognizers.Add(DragFrame);
 			
             treeDragListA.Add(newFrame);
@@ -70,19 +73,25 @@ public partial class TreePage : ContentPage
 		Console.WriteLine(relativeToContainerPosition);
 	}
 
-	public void OnDragStarting(object? sender, DragStartingEventArgs e, string listItemBpGuid)
+	public void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey)
         {
-            Console.WriteLine($"Frame dragged! : {listItemBpGuid}");
-			e.Data.Text = listItemBpGuid;
+            Console.WriteLine($"Frame dragged! : {bpModelKey}");
+			e.Data.Text = bpModelKey;
         }
 
 	public async void OnDropIntoTreeLayout(object sender, DropEventArgs e)
 	{
-		string listItemBpGuid = await e.Data.GetTextAsync();
+		string bpModelKey = await e.Data.GetTextAsync();
 		Console.WriteLine(sender.ToString());
 		Console.WriteLine(e.ToString());
-		Console.WriteLine($"listItemBpGuid: {listItemBpGuid}");
-		Console.WriteLine($"listItemBpName: {ButtonList[listItemBpGuid]}");
+		Console.WriteLine($"bpModelKey: {bpModelKey}");
+		object bpModelReferanceObject;
+		if (BlueprintModels.checkBpModel(bpModelKey, out bpModelReferanceObject)){
+			if (bpModelReferanceObject is Dictionary<string,dynamic> useableDictionary)
+			{
+				Console.WriteLine($"bpModel $type: {useableDictionary["$type"]}");
+			}
+		}
 		Console.WriteLine((sender as Element)?.Parent as AbsoluteLayout);
 		AbsoluteLayout senderParent = (sender as Element)?.Parent as AbsoluteLayout;
 		//Console.WriteLine((sender);
@@ -92,11 +101,11 @@ public partial class TreePage : ContentPage
 			Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
 			Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
 		//}
-		placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, listItemBpGuid);
+		placeNewBpTemplateFrame(senderParent, relativeToContainerPosition, bpModelKey);
 		// Perform logic to take action based on retrieved value.
 	}
 
-	public void placeNewBpTemplateFrame(AbsoluteLayout targetParent, Point? dropPosition, string listItemBpGuid)
+	public void placeNewBpTemplateFrame(AbsoluteLayout targetParent, Point? dropPosition, string bpModelKey)
 	{
 		/*Frame newBpFrame = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"),
 										Margin = new Thickness(0,2),
@@ -117,7 +126,7 @@ public partial class TreePage : ContentPage
 		newBpFrame.Content = newBpframeLabel;
 		//AbsoluteLayout.SetLayoutBounds(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
 		*/
-		Frame newGenFrame = GenerateNewBpTemplateFrame(listItemBpGuid);
+		Frame newGenFrame = GenerateNewBpTemplateFrame(bpModelKey);
 		AbsoluteLayout.SetLayoutBounds(newGenFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
         //x AbsoluteLayout.SetLayoutFlags(newBpFrame, AbsoluteLayoutFlags.PositionProportional);
 		//x targetParent.Add(newBpFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
@@ -125,7 +134,7 @@ public partial class TreePage : ContentPage
 		targetParent.Add(newGenFrame);
 	}
 
-	public Frame GenerateNewBpTemplateFrame(string listItemBpGuid)
+	public Frame GenerateNewBpTemplateFrame(string bpModelKey)
 	{
 		//var dropData = "testData";
 		int testWidth = 200;
@@ -155,13 +164,13 @@ public partial class TreePage : ContentPage
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
 
 		
-		Label bpframeLabel = new Label{Text = $"Label Text: {ButtonList[listItemBpGuid]}", 
+		Label bpframeLabel = new Label{Text = $": {BlueprintModels.ModelDictionary[bpModelKey]["buttonName"]} :", 
 										FontSize = 12, 
 										Margin =  new Thickness(0,0), 
 										HorizontalTextAlignment = TextAlignment.Center,
 										VerticalTextAlignment = TextAlignment.Start
 									};
-		Label bpframeLineItem = new Label{Text = $"Line Item: {listItemBpGuid}", 
+		Label bpframeLineItem = new Label{Text = $"$type: {BlueprintModels.ModelDictionary[bpModelKey]["$type"]}", 
 										FontSize = 10, 
 										Margin =  new Thickness(0,0), 
 										HorizontalTextAlignment = TextAlignment.Start,
