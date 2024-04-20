@@ -28,7 +28,7 @@ public class BlueprintModels{
     public static void GenerateBpDictionary()
     {
         _modelDictionary.Add("AbilityTargetsAround", new Dictionary<string,dynamic> {
-                    {"Categories",new List<string>{"Targeting","Area","Search"}},
+                    {"Categories",new List<string>{"Targeting", "Area", "Search"}},
                     {"buttonName","Ability Targets Around"},
                     {"$type","757439ef8cc900741bd9b57bf26eb500, AbilityTargetsAround"},
                     {"m_Flags",0},
@@ -46,7 +46,7 @@ public class BlueprintModels{
         });
 
         _modelDictionary.Add("AbilityEffectRunAction", new Dictionary<string,dynamic> {
-                    {"Categories",new List<string>{"Trigger","Action","Effect"}},
+                    {"Categories",new List<string>{"Trigger", "Action", "Effect"}},
                     {"buttonName","Ability Effect Run Action"},
                     {"$type","66e032e5cf38801428940a1a0d14b946, AbilityEffectRunAction"},
                     {"m_Flags",0},
@@ -54,7 +54,57 @@ public class BlueprintModels{
                     {"PrototypeLink",new Dictionary<string,string> {{"guid",""},{"name",""}}},
                     {"m_Overrides", new List<string> {"*"}},
                     {"SavingThrowType",new List<string> {"Fortitude","Willpower","Reflex"}},
-                    {"Actions", new Dictionary<string,List<string>> {{"Actions",["*"]}}},
+                    {"Actions", new Dictionary<string,List<string>> {{"Actions",["*"]}}}
+                });
+        _modelDictionary.Add("AddFactContextActions", new Dictionary<string,dynamic> {
+                    {"Categories",new List<string>{"Trigger", "Action", "Context"}},
+                    {"buttonName","Ability Fact Context Actions"},
+                    {"$type","25d172d2be8f52f468b2050d14d59806, AddFactContextActions"},
+                    {"m_Flags",0},
+                    {"name","$TBD$GuidDashed"},
+                    {"PrototypeLink",new Dictionary<string,string> {{"guid",""},{"name",""}}},
+                    {"m_Overrides", new List<string> {"*"}},
+                    {"Activated",new Dictionary<string,dynamic> {
+                            {"Actions", new List<Dictionary<string,dynamic>> {}
+                            }
+                        }
+                    }
+                });
+        _modelDictionary.Add("Conditional", new Dictionary<string,dynamic> {
+                    {"Categories",new List<string>{"Trigger", "Action", "Conditional"}},
+                    {"buttonName","Conditional Action Trigger"},
+                    {"$type","52d8973f2e470e14c97b74209680491a, Conditional"},
+                    {"name","$TBD$GuidDashed"},
+                    {"Comment",""},
+                    {"ContitionsChecker",new Dictionary<string,dynamic>{
+                            {"Operation",new List<string> {"And","Or"}},
+                            {"Contitions",new List<Dictionary<string,dynamic>>{}}
+                    }},
+                    {"IfTrue",new List<Dictionary<string,dynamic>>{}},
+                    {"IfFalse",new List<Dictionary<string,dynamic>>{}}                    
+                });
+        _modelDictionary.Add("ContextConditionHasFact", new Dictionary<string,dynamic> {
+                    {"Categories",new List<string>{"Bool", "Context", "Conditional", "Fact"}},
+                    {"buttonName","Context Condition Has Fact"},
+                    {"$type","9706de75454abeb48bd4cfa7f526a1c2, ContextConditionHasFact"},
+                    {"name","$TBD$GuidDashed"},
+                    {"Not",new List<bool>{true,false}},
+                    {"m_Fact","!bp_"}                    
+                });
+        _modelDictionary.Add("HasFact", new Dictionary<string,dynamic> {
+                    {"Categories",new List<string>{"Bool", "Conditional", "Fact"}},
+                    {"buttonName","Has Fact (Non-Contextual)"},
+                    {"$type","f310985bf2724df4a97b165f74b806e8, HasFact"},
+                    {"name","$TBD$GuidDashed"},
+                    {"Not",new List<bool>{true,false}},
+                    {"Unit",new Dictionary<string,dynamic>{
+                        {"$type",new Dictionary<string,string>{
+                            {"Party Unit","2b9ad38748400fb4a9db077957c3a839"},
+                            {"Player Character","25c132cb07bfaef4683b062a74f6e012"}
+                        }},
+                        {"name","$TBD$GuidDashed"}
+                    }},
+                    {"m_Fact","!bp_"}                    
                 });
     }
 
