@@ -12,6 +12,7 @@ public partial class App : Application
 	//public App(MainPage page)
 	{
 		InitializeComponent();
+		DependencyService.Register<IDataTransfer, DataTransfer>();
 
 		MainPage = new AppShell();
 		//MainPage = page;

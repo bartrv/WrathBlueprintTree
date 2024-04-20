@@ -7,7 +7,10 @@ public partial class MainPage : ContentPage
 {
 	int count = 0;
 	LastFilePath LastBPFilePath = new LastFilePath();
-	object bpObject = new Dictionary<string,dynamic>{};
+	//BlueprintObject bpObject;
+	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
+
+	object bpDataAsTable = new Dictionary<string,dynamic>{};
 	bool bpAvailable = false;
 	public MainPage()
 	{
@@ -37,11 +40,19 @@ public partial class MainPage : ContentPage
 	{
 		//OpenFile_Bp(sender, e);
 		var (RawFileText, fileFullPath) = BpFile.Open(sender, e);
-		editor.Text = RawFileText;
-		bpFilePath.Text = fileFullPath;
-		bpObject = new BlueprintObject(RawFileText);
-		if (bpObject is WrathBlueprintTree.BlueprintObject){
+		XferObject.OpenedFile = RawFileText;
+		//editor.Text = RawFileText;
+		editor.Text = XferObject.OpenedFile;
+		//bpFilePath.Text = fileFullPath;
+		XferObject.OpenedFileFullPath = fileFullPath;
+		//bpObject = new BlueprintObject(RawFileText);
+		XferObject.IngestedBpObject = new BlueprintObject(RawFileText);
+		//if (bpObject is WrathBlueprintTree.BlueprintObject){
+		if (XferObject.IngestedBpObject is WrathBlueprintTree.BlueprintObject){
 			bpAvailable = true;
+			//bpDataAsTable = bpObject.GenerateDataTables();
+			XferObject.IngestedBpObjectFlat = XferObject.IngestedBpObject.GenerateDataTables();
+			XferObject.FullBpTree = new FullBpTreeCollection(XferObject.IngestedBpObjectFlat);
 		}
 		//await DisplayAlert("Alert", "You have been alerted", "OK");
 	}
