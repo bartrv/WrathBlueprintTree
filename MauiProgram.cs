@@ -17,6 +17,7 @@ public static class MauiProgram
 			//builder.Services.AddTransient<MainPage>();
 			builder.Services.AddTransient<BlueprintObject>();
 			builder.Services.AddTransient<BpFile>();
+			builder.Services.AddTransient<TreeBuilder>();
 			//builder.Services.AddTransient<BlueprintModels>();
 
 #if DEBUG

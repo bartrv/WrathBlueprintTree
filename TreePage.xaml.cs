@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Windows.Input;
+//using Foundation;
 using Microsoft.Extensions.Options;
 //using Microsoft.UI.Xaml.Controls.Primitives;
 //using Microsoft.UI.Windowing;
@@ -9,14 +11,31 @@ public partial class TreePage : ContentPage
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 	Dictionary<string,string> ButtonList = [];
+	Point? relativeToContainerPosition;
 	public TreePage()
 	{
 		InitializeComponent();
         //Button buttonAA = new Button {Text = "Button text"};
-        int btnI = 0;
+        //int btnI = 0;
         int ButtonCount = BlueprintModels.ModelDictionary.Count;
-		
-		foreach (KeyValuePair<string, dynamic> entry in BlueprintModels.ModelDictionary) //Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
+		generateTreePageButtonList(); //Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
+		if (XferObject.IsFile == true) 
+		{
+			if (!TreeBuilder.GenerateTreeFromFileData()) 
+			{
+				ThrowAlert();
+			}
+		}
+	}
+
+	async public static void ThrowAlert()
+	{
+			bool x =  await Application.Current.MainPage.DisplayAlert("Tittle","Hello","OK","NotOK");
+	}
+	private void generateTreePageButtonList()
+	{
+		//Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
+		foreach (KeyValuePair<string, dynamic> entry in BlueprintModels.ModelDictionary) 
 		{
 			var newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
 										Margin = new Thickness(0,2),
@@ -46,10 +65,9 @@ public partial class TreePage : ContentPage
 			newFrame.GestureRecognizers.Add(DragFrame);
 			
             treeDragListA.Add(newFrame);
-        }   
+        } 
 	}
 
-	Point? relativeToContainerPosition;
 	public void OnPointerMovedInTreeView(object sender, PointerEventArgs e)
 	{
 		relativeToContainerPosition = e.GetPosition((View)sender);
@@ -91,7 +109,6 @@ public partial class TreePage : ContentPage
 
 	public void placeNewBpTemplateFrame(AbsoluteLayout targetParent, Point? dropPosition, string bpModelKey)
 	{
-
 		Frame newGenFrame = GenerateNewBpTemplateFrame(bpModelKey);
 		AbsoluteLayout.SetLayoutBounds(newGenFrame, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400));
 		//Todo Generate new class to hold data object

@@ -35,7 +35,7 @@ public partial class MainPage : ContentPage
 		//var bpObject = new BlueprintObject(editor.Text);
 	}
 
-	public void MenuBarFileOpen(object sender, System.EventArgs e)
+	public async void MenuBarFileOpen(object sender, System.EventArgs e)
 	//async void MenuTesting(object sender, System.EventArgs e)
 	{
 		//OpenFile_Bp(sender, e);
@@ -53,6 +53,8 @@ public partial class MainPage : ContentPage
 			//bpDataAsTable = bpObject.GenerateDataTables();
 			XferObject.IngestedBpObjectFlat = XferObject.IngestedBpObject.GenerateDataTables();
 			XferObject.FullBpTree = new FullBpTreeCollection(XferObject.IngestedBpObjectFlat);
+			XferObject.IsFile = true;
+			await Shell.Current.GoToAsync("//TreePage");
 		}
 		//await DisplayAlert("Alert", "You have been alerted", "OK");
 	}
