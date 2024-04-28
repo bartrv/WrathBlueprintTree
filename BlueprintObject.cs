@@ -464,22 +464,6 @@ public class BlueprintObject
 	}
 
 
-	//For managing data, I have 2 broad thoughts:
-    //First is access the bData object directly with get/set or Assign/Fetch methods.
-	//This requires a loop to traverse every level of the object every time something is updates and on every value that will need to be generated.
-	//since the objects can get fairly deep, this seems like it will slow down. 
-
-	//the other is to mimic a nSQL data structure, using the desired key traversal as a single key string so db.data.override[1]=x becomes db.Fetch("data.override.1")
-	//since the objects themselves are tiny, this seems the better approach.  
-	// *Under that assumption, remaining notes will follow the paradigm of a Flat nSQL Dictionary where the Value fields are Object references to the actual bpData Object
-
-	//For splitting the data out to individual forms and re-conecting everything:
-	//		1. EVERY "$type": referance tree becomes its own form 
-	//			a. as a result, it also becomes its own OBJECT
-	//		2. "$type" Objects are to be directly referenced in the data structure as an Object so the memory referencing stays intact
-	//		3. The UI form should be built from the _modelDictionary found in BlueprintModels
-	//		4. The fields in the UI form should contain OPTIONS as defined in BlueprintModels, where appropriate
-	//		5. UI field selections or input are to be remitted to the Flat file
 	public static dynamic? Fetch(string dotTarget){
 		dynamic? bpFetchResult = null;
 
@@ -549,25 +533,102 @@ public class BlueprintObject
         return bpFlatArrayBuildDict;
     }
 }
+	//For managing data, I have 2 broad thoughts:
+    //First is access the bData object directly with get/set or Assign/Fetch methods.
+	//This requires a loop to traverse every level of the object every time something is updates and on every value that will need to be generated.
+	//since the objects can get fairly deep, this seems like it will slow down. 
 
+	//the other is to mimic a nSQL data structure, using the desired key traversal as a single key string so db.data.override[1]=x becomes db.Fetch("data.override.1")
+	//since the objects themselves are tiny, this seems the better approach.  
+	// *Under that assumption, remaining notes will follow the paradigm of a Flat nSQL Dictionary where the Value fields are Object references to the actual bpData Object
+
+	//For splitting the data out to individual forms and re-conecting everything:
+	//		1. EVERY "$type": referance tree becomes its own form 
+	//			a. as a result, it also becomes its own OBJECT
+	//		2. "$type" Objects are to be directly referenced in the data structure as an Object so the memory referencing stays intact
+	//		3. The UI form should be built from the _modelDictionary found in BlueprintModels
+	//		4. The fields in the UI form should contain OPTIONS as defined in BlueprintModels, where appropriate
+	//		5. UI field selections or input are to be remitted to the Flat file
+	//		6. Question: in its current form the bpData object Dictionary seems unnecessary when paired withe the flattened data frame, 
+	//				once the tree/frame is generated should BlueprintObjects.bpData be left as a historical referance to the imported object?
 public class FullBpTreeCollection
 {
-	public Dictionary<string,dynamic>? tree;
+//tree:
+//	{id, Dict} id = AssetId, guid, or name(unique) - depends on what the bp object provides, root bp = AssetId, everything else should have a name, guid as a fallback
+//	Dict:
+//		{data, Dict} flat bp referance table/dictionary; values = object referance to BlueprintObject.bpData
+//		{panel, Dict} {id=id,rect=rect(x,y,Xw,Yh),links=Dict{nodeid=[targetId,linkname/id]}}
+//		{form, Dict} key = xaml form item x:Name, Value = List<?> {UI Designation, object referance, IList if applicable, null-object Initial Value}
+//					UI Designation<string>: when applicable use MAUI interface name/method (Picker, Check, etc.), else use "LinkConnect"
+//	{AllLinks,Dict<string,List<string>>}  This serves as a rollover referance and a reposition/drag referance {<linkidstring>, [node0,nodeLinked,Point0,PointLinked,QSplineObj?]}
+//					eg. {[0]"13f7ab9d...",
+//							{"data",{"Blueprint.bpData.Data.Components[0]",<object>"a1234b..."}},
+//							{"form",{"name", {"Entry", "13f7ab9d.name",<object>Blueprint.bpData.Data.Components[0].name,"","Enter Unique Name Here"}}, }	}
+//			
+	
+	
+	
+	public Dictionary<string,dynamic> tree;
 	public Dictionary<string,dynamic>? wireList;
-	public FullBpTreeCollection(Dictionary<string,dynamic>? bpDataObject ){
+	public FullBpTreeCollection(Dictionary<string,dynamic>? bpFlatData ){
 		
 		this.tree = [];
 		this.wireList = [];
 
-		if (bpDataObject is not null){
-			BranchTree(bpDataObject);
+		if (bpFlatData is not null){
+			BranchTree(bpFlatData);
 		}
-
 	}
 
-	private void BranchTree(Dictionary<string,dynamic>? bpDataObject)
+	private void BranchTree(Dictionary<string,dynamic> bpFlatData)
 	{
+		if (bpFlatData is not null){
+			string rootPath;
+			string AssetId = bpFlatData["dbObj.AssetId"];
+			int bpFlatDataKeyLength = 0;
+			string currentBpKey;
+			string bpLineKeyCheck;
+			this.tree.Add(AssetId, new List<dynamic>{"dbObj.Data"});
+			//tree[AssetId].Add(["rootPath", "dbObj.Data"]);
+			//loop 1, Discover references and
+			foreach (var (bpLineKey, bpLineValue) in bpFlatData)
+			{
+				//Console.WriteLine(bpLineKey+" : "+bpLineValue);
+				if (bpLineKey[^4..] == "name" && bpLineKey[^9..^5] != "Data")
+				{
+					rootPath = bpLineKey[..bpLineKey.LastIndexOf('.')];
 
+					this.tree.Add(bpLineValue, new List<dynamic>{rootPath});
+					//this.tree[bpLineValue].Add(rootPath);
+
+					Console.WriteLine($"Tree Item Added: {bpLineValue}");
+				}
+			}
+
+			foreach (var (typeName,_) in this.tree)
+			{
+				rootPath = this.tree[typeName][0];
+				foreach (var (bpLineKey, bpLineValue) in bpFlatData)
+				{
+					bpFlatDataKeyLength = bpLineKey.LastIndexOf('.');
+					bpLineKeyCheck = bpLineKey[..bpFlatDataKeyLength];
+					if (bpLineKeyCheck == rootPath)
+					{
+						//if (bpFlatDataKeyLength == rootPath.Length)
+						//{
+							currentBpKey = bpLineKey[(bpFlatDataKeyLength+1)..];
+							this.tree[typeName].Add(new List<dynamic>{currentBpKey,bpLineValue});
+							
+						//}
+					} else if (bpFlatDataKeyLength > rootPath.Length)
+					{
+						if (bpLineKey[^4..] == "name")
+						{
+							this.tree[typeName].Add(new List<dynamic>{bpLineKeyCheck,bpLineValue});
+						}
+					}
+				}
+			}
+		}
 	}
-
 }
