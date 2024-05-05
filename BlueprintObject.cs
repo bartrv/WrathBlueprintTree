@@ -1,9 +1,13 @@
 //using CoreImage;
 
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Collections;
+using System.Collections.Specialized;
 //using AuthenticationServices;
 using Microsoft.Maui.Controls.Platform.Compatibility;
 using Microsoft.Maui.Layouts;
+using System.ComponentModel;
 //using UIKit;
 
 namespace WrathBlueprintTree;
@@ -16,7 +20,7 @@ public class BlueprintObject
 	List<string> treeBranch;
 	int isQuote;
 	string entryType;
-	public Dictionary<string, dynamic> bpData;
+	Dictionary<string, dynamic> bpData;
 
 	public BlueprintObject(string sourceTextElement)
 	{
@@ -32,7 +36,7 @@ public class BlueprintObject
 		this.MainLoop();
 
 	}
-
+	
 	private string BuildString()
 	{
 		string currentString = "";
@@ -569,18 +573,30 @@ public class FullBpTreeCollection
 	
 	
 	public Dictionary<string,dynamic> tree;
-	public Dictionary<string,dynamic>? wireList;
+	public Dictionary<string,dynamic> BpTreeVM;
+	//public Dictionary<string,dynamic>? wireList;
 	public FullBpTreeCollection(Dictionary<string,dynamic>? bpFlatData ){
 		
 		this.tree = [];
-		this.wireList = [];
+		//this.wireList = [];
+		this.BpTreeVM = [];
+		this.BpTreeVM.Add("Panels",new Dictionary<string,dynamic>{});
+		this.BpTreeVM.Add("Wires",new Dictionary<string,dynamic>{});
 
 		if (bpFlatData is not null){
 			BranchTree(bpFlatData);
+		} else {
+			SeedBpTree();
 		}
 	}
 
-	private void BranchTree(Dictionary<string,dynamic> bpFlatData)
+	private void SeedBpTree()
+	{
+		string AssetId = $"{Guid.NewGuid()}";
+		this.tree.Add(AssetId, new List<dynamic>{"dbObj.Data"});
+		
+	}
+	private void BranchTree(Dictionary<string,dynamic> bpFlatData) // only called when parsing a file
 	{
 		if (bpFlatData is not null){
 			string rootPath;
@@ -588,7 +604,8 @@ public class FullBpTreeCollection
 			int bpFlatDataKeyLength = 0;
 			string currentBpKey;
 			string bpLineKeyCheck;
-			this.tree.Add(AssetId, new List<dynamic>{"dbObj.Data"});
+			this.tree.Add(AssetId, new OrderedDictionary{});
+			this.tree[AssetId].Add("rootPath", new List<string>{"dbObj.Data"});
 			//tree[AssetId].Add(["rootPath", "dbObj.Data"]);
 			//loop 1, Discover references and
 			foreach (var (bpLineKey, bpLineValue) in bpFlatData)
@@ -598,7 +615,8 @@ public class FullBpTreeCollection
 				{
 					rootPath = bpLineKey[..bpLineKey.LastIndexOf('.')];
 
-					this.tree.Add(bpLineValue, new List<dynamic>{rootPath});
+					this.tree.Add(bpLineValue, new OrderedDictionary{});
+					this.tree[bpLineValue].Add("rootPath", new List<dynamic>{rootPath});
 					//this.tree[bpLineValue].Add(rootPath);
 
 					Console.WriteLine($"Tree Item Added: {bpLineValue}");
@@ -607,7 +625,15 @@ public class FullBpTreeCollection
 
 			foreach (var (typeName,_) in this.tree)
 			{
-				rootPath = this.tree[typeName][0];
+				//rootPath = this.tree[typeName][0];
+				rootPath = this.tree[typeName]["rootPath"][0];
+				//this.tree[typeName].Add("Categories", new List<string>{"FromFile"});
+				//this.tree[typeName].Add("buttonName", new List<string>{"FromFile"});
+				//this.tree[typeName].Add("title", new List<string>{"Label", "auto", "visible", "string", "ToDo:NeedToExtract"});
+				this.tree[typeName].Add("Categories", new List<dynamic>{"FromFile"});
+				this.tree[typeName].Add("buttonName", new List<dynamic>{"FromFile"});
+				this.tree[typeName].Add("title", new List<dynamic>{"Label", "auto", "visible", "string", "ToDo:NeedToExtract"});
+				//this.tree[typeName].Add("$AssetId", new List<string>{typeName});
 				foreach (var (bpLineKey, bpLineValue) in bpFlatData)
 				{
 					bpFlatDataKeyLength = bpLineKey.LastIndexOf('.');
@@ -617,14 +643,15 @@ public class FullBpTreeCollection
 						//if (bpFlatDataKeyLength == rootPath.Length)
 						//{
 							currentBpKey = bpLineKey[(bpFlatDataKeyLength+1)..];
-							this.tree[typeName].Add(new List<dynamic>{currentBpKey,bpLineValue});
+							this.tree[typeName].Add(currentBpKey,new List<dynamic>{"FromFile",bpLineValue});
 							
 						//}
 					} else if (bpFlatDataKeyLength > rootPath.Length)
 					{
 						if (bpLineKey[^4..] == "name")
 						{
-							this.tree[typeName].Add(new List<dynamic>{bpLineKeyCheck,bpLineValue});
+							//this.tree[typeName].Add(new List<dynamic>{bpLineKeyCheck,bpLineValue});
+							this.tree[typeName].Add(bpLineKeyCheck,new List<dynamic>{"Link","FromFile",bpLineKeyCheck,bpLineValue});
 						}
 					}
 				}
