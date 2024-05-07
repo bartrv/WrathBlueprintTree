@@ -3,15 +3,17 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
-using Windows.UI.Notifications;
+using Microsoft.Maui.Controls.Shapes;
+using Windows.Devices.Input;
+//using Windows.UI.Notifications;
 namespace WrathBlueprintTree;
 
 public partial class TreePage : ContentPage
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
-	Dictionary<string,string> ButtonList = [];
+	//Dictionary<string,string> ButtonList = [];
 	Point? relativeToContainerPosition;
-    Dictionary<string,dynamic> TreeViewMVVM = [];
+    //Dictionary<string,dynamic> TreeViewMVVM = [];
 	public TreePage()
 	{
 		InitializeComponent();
@@ -19,10 +21,11 @@ public partial class TreePage : ContentPage
         //int btnI = 0;
         int ButtonCount = BlueprintModels.ModelDictionary.Count;
 		generateTreePageButtonList(); //Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
+		VerticalStackLayout? SideBarPanelVertStack = FindByName("sbEditPanelVStack") as VerticalStackLayout;
 		if (XferObject.IsFile == true) 
 		{
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.IngestedBpObjectFlat)) 
-			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer)) 
+			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer, SideBarPanelVertStack)) 
 			{
 				ThrowAlert();
 			} else {
@@ -45,15 +48,17 @@ public partial class TreePage : ContentPage
 		//Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
 		foreach (KeyValuePair<string, dynamic> entry in BlueprintModels.ModelDictionary) 
 		{
-			var newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
+			//var newFrame = new Frame{BackgroundColor = Color.FromRgba("#AA9999FF"),
+			var newFrame = new Border{BackgroundColor = Color.FromRgba("#AA9999FF"),
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 3,
+										//CornerRadius = 3,  //Frame Control
 										WidthRequest= 200,
 										HeightRequest = 24,
 										VerticalOptions = LayoutOptions.Center,
-										HorizontalOptions = LayoutOptions.Center
+										HorizontalOptions = LayoutOptions.Center,
 									};
+
             Label frameLabel;
 			Type testingType = entry.Value["buttonName"].GetType();
 			if (testingType == typeof(List<string>)){
@@ -96,6 +101,13 @@ public partial class TreePage : ContentPage
             Console.WriteLine($"Frame dragged! : {bpModelKey}");
 			e.Data.Text = bpModelKey;
         }
+
+	public static void OnMouseClick_PanelSelect(object sender, TappedEventArgs e)
+	{
+		Console.WriteLine(sender.ToString());
+		(sender as Border).Stroke = Color.FromRgba("#990000FF");
+		(sender as Border).StrokeThickness = 3;
+	}
 
 	public async void OnDropIntoTreeLayout(object sender, DropEventArgs e)
 	{
@@ -252,13 +264,25 @@ public partial class TreePage : ContentPage
 						};
 		AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-20,28,16,16));
 		*/
-		Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
+		//Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
+		Border bpFrameVisualMain = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 3
+										//CornerRadius = 3
+										Stroke = Color.FromRgba("#333333FF"),
+										StrokeThickness = 2,
+										StrokeShape = new RoundRectangle
+											{
+												CornerRadius = new CornerRadius(3, 3, 3, 3)
+											}
 										};
 	
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
+
+		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
+		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_PanelSelect(s, e);};
+		bpFrameVisualMain.GestureRecognizers.Add(TapClickEvent);
+
 		// XferObject.FullBpTree.tree[PanelBpUniqueName].Add(tempList);
 		//[0] = ["Categories", ..], [1] = ["buttonName", .. ], [2] = ["title", .. ]
 		Console.WriteLine("buttonName"+XferObject.FullBpTree.tree[PanelBpUniqueName]["buttonName"][0]); //Static issues, works when parent method is not static
@@ -386,13 +410,29 @@ public partial class TreePage : ContentPage
 						CornerRadius = 8
 						};
 		AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(testWidth-20,28,16,16));
-
+		/*
 		Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
 										CornerRadius = 3
+										};*/
+		Border bpFrameVisualMain = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
+										Margin = new Thickness(0,2),
+										Padding = new Thickness(0,0),
+										//CornerRadius = 3
+										Stroke = Color.FromRgba("#333333FF"),
+										StrokeThickness = 2,
+										StrokeShape = new RoundRectangle
+											{
+												CornerRadius = new CornerRadius(3, 3, 3, 3)
+											}
 										};
 		AbsoluteLayout.SetLayoutBounds(bpFrameVisualMain, new Rect(10,0,testWidth-20,testHeight-4));
+
+		//Add Tap Gesture Recognizer (mouse Click) to each panel for panel selection code
+		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
+		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_PanelSelect(s, e);};
+		bpFrameVisualMain.GestureRecognizers.Add(TapClickEvent);
 
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
 

@@ -1,17 +1,21 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls.Internals;
+using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Layouts;
 using System.Collections;
 using System.Collections.Specialized;
-using Windows.ApplicationModel.Email;
+//using Windows.ApplicationModel.Email;
 namespace WrathBlueprintTree;
 
 public partial class TreeBuilder
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 	//AbsoluteLayout targetParent;
-    public static bool GenerateTreeFromFileData(Dictionary<string,dynamic> XferObjectFBPTree, AbsoluteLayout? targetParent = null)
+    public static bool GenerateTreeFromFileData(Dictionary<string,dynamic> XferObjectFBPTree, AbsoluteLayout? targetParent = null, VerticalStackLayout? SideBarPanelVertStack = null) //SideBarPanelVertStack added for testing VM object access
     {
 		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
-		Frame newGenPanel;
+		//Frame newGenPanel;
+		Border newGenPanel;
 		int panelHeight;
 		int panelWidth;
         Point dropPosition = new() { X = 5, Y = 5 };
@@ -29,17 +33,20 @@ public partial class TreeBuilder
 				targetParent.Add(newGenPanel); // Assign panel to Frame
 				dropPosition.X = dropPosition.X+panelWidth+16+50;
 				//{panel, Dict} {id=id/branchName,rect=Rect(x,y,Xw,Yh),links=Dict{nodeid=[targetId,linkname/id]}}
-				Frame sideBarPanel = GenerateSideBarPanel(branchName, sideBarItems);
+				//Frame sideBarPanel = GenerateSideBarPanel(branchName, sideBarItems);
+				Border sideBarPanel = GenerateSideBarPanel(branchName, sideBarItems);
+				SideBarPanelVertStack.Add(sideBarPanel);// !!!!Testing only!!!!
 				XferObject.FullBpTree.BpTreeVM["Panels"][branchName] = new Dictionary<string,dynamic>{
 																		{"id",branchName}, //id/branchName
 																		{"rect",new Rect(dropPosition.X,dropPosition.Y,panelWidth,panelHeight)}, //Rect(x,y,Xw,Yh) - Panel Lication, w,h directly insert into AbsolutePosition(Rect)
 																		{"links",new Dictionary<string,List<string>>{}}, //{nodeGuid/Name:{"TargetPanelId","LinkWireId"}}
-																		{"sideBar",new OrderedDictionary{}} //[]
+																		//{"sideBar",new OrderedDictionary{}} //[generate panel on select]
+																		{"sideBar", sideBarPanel} //[generate panel on select]
 																	};
-				foreach (List<dynamic> sBarItem in sideBarItems)
-				{
-					XferObject.FullBpTree.BpTreeVM["Panels"][branchName]["sideBar"].Add(sBarItem[0],sBarItem[1..]);
-				}
+				//foreach (List<dynamic> sBarItem in sideBarItems)
+				//{
+				//	XferObject.FullBpTree.BpTreeVM["Panels"][branchName]["sideBar"].Add(sBarItem[0],sBarItem[1..]);
+				//}
 																
 
 			}
@@ -48,12 +55,21 @@ public partial class TreeBuilder
         return false;
     }
 	
-	private static Frame GenerateSideBarPanel(string branchName, List<dynamic> sideBarItems)
+	//private static Frame GenerateSideBarPanel(string branchName, List<dynamic> sideBarItems)
+	private static Border GenerateSideBarPanel(string branchName, List<dynamic> sideBarItems)
 	{
-		Frame SideFrameSkeleton = new Frame{BackgroundColor = Color.FromRgba("#BBBBBBFF"), //Visual Frame container
+		//Frame SideFrameSkeleton = new Frame{BackgroundColor = Color.FromRgba("#BBBBBBFF"), //Visual Frame container
+		Border SideFrameSkeleton = new Border{BackgroundColor = Color.FromRgba("#BBBBBBFF"), //Visual Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 3};
+										// CornerRadius = 3 Frame Styling Element
+										Stroke = Color.FromRgba("#333333FF"),
+										StrokeThickness = 2,
+										StrokeShape = new RoundRectangle
+											{
+												CornerRadius = new CornerRadius(2, 2, 2, 2)
+											}
+										};
 		ColumnDefinition sbColOne = new ColumnDefinition();
 		ColumnDefinition sbColTwo = new ColumnDefinition();
 		sbColOne.Width = 150;
@@ -67,7 +83,7 @@ public partial class TreeBuilder
 		
 		int ItemCount = sideBarItems.Count;
 
-		for (int i = 2; i < ItemCount; i++)
+		for (int i = 0; i < ItemCount; i++)
 		{
 			sbLayoutGrid.RowDefinitions.Add(rowDef);
 		}
@@ -77,23 +93,45 @@ public partial class TreeBuilder
 		int PanelLayoutGridRow = 0;
 
 		foreach (List<dynamic> sBarItem in sideBarItems)
+			{
+				switch (sBarItem[1])
 				{
-					switch (sBarItem[0])
-					{
-						case "Picker": 
-							break;
-						case "CheckBox": 
-							break;
-						case "Entry": 
-							break;
-						case "ListNull": 
-							break;
-					} 
-				}
+					case "Picker": 
+						break;
+					case "CheckBox": 
+						break;
+					case "Entry": 
+						break;
+					case "ListNull": 
+						break;
+				} 
+				var TempVMLabelForLoop = new Label{
+											Text = sBarItem[0],
+											//Text = AnotherCopyIdx.Last(),
+											FontSize = 10, 
+											Margin =  new Thickness(0,0), 
+											HorizontalTextAlignment = TextAlignment.Start,
+											VerticalTextAlignment = TextAlignment.Start
+											};
+			
+			Grid.SetRow(TempVMLabelForLoop,PanelLayoutGridRow);
+			Grid.SetColumn(TempVMLabelForLoop,0);
+			sbLayoutGrid.Children.Add(TempVMLabelForLoop);
+
+			PanelLayoutGridRow++;
+			//panelHeight = panelHeight+18;
+			}
+
+		VerticalStackLayout sideFrameVertLayout = [];
+		sideFrameVertLayout.Add(sbLayoutGrid);
+		//bpFrameContainerAbsLayout.Add(bpNode);
+		SideFrameSkeleton.Content = sideFrameVertLayout;
+
 		return SideFrameSkeleton;
 	}
 	
-	public static (Frame, int, int, List<dynamic>) GenerateNewBpTemplatePanelFromListModel(string PanelBpUniqueName)
+	//public static (Frame, int, int, List<dynamic>) GenerateNewBpTemplatePanelFromListModel(string PanelBpUniqueName)
+	public static (Border, int, int, List<dynamic>) GenerateNewBpTemplatePanelFromListModel(string PanelBpUniqueName)
 	{
 		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 		List<dynamic> sideBarItems = [];
@@ -107,19 +145,31 @@ public partial class TreeBuilder
 		int panelWidth = (int)ColOne.Width.Value + (int)ColTwo.Width.Value + (int)ColThree.Width.Value;
 		int panelHeight = 36;
 
-		Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+		//Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+		Border bpFrameContainer = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 0
+										// CornerRadius = 0 Frame Styling option
 										};
 		AbsoluteLayout bpFrameContainerAbsLayout = [];
 		
-		Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
+		//Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
+		Border bpFrameVisualMain = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 3
+										//CornerRadius = 3 Frame Styling Option
+										Stroke = Color.FromRgba("#333333FF"),
+										StrokeThickness = 2,
+										StrokeShape = new RoundRectangle
+											{
+												CornerRadius = new CornerRadius(3, 3, 3, 3)
+											}
 										};
-	
+		//Add Tap Gesture Recognizer (mouse Click) to each panel for panel selection code
+		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
+		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_PanelSelect(s, e);};
+		bpFrameVisualMain.GestureRecognizers.Add(TapClickEvent);
+
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
 		// XferObject.FullBpTree.tree[PanelBpUniqueName].Add(tempList);
 		//[0] = ["Categories", ..], [1] = ["buttonName", .. ], [2] = ["title", .. ]
@@ -218,10 +268,10 @@ public partial class TreeBuilder
 
 		return (bpFrameContainer, panelHeight, panelWidth, sideBarItems);
 	}
+
 	private Picker BoolPicker()
 	{
 		Picker bp = new Picker{
-
 		};
 		return bp;
 	}

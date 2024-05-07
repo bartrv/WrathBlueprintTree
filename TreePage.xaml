@@ -36,11 +36,11 @@
 
             </ScrollView>
 
-              <ScrollView Grid.Column="2" x:Name="treeScrollEdit" 
-                VerticalOptions="FillAndExpand" WidthRequest="220" 
-                Orientation="Vertical" 
-                VerticalScrollBarVisibility="Always"
-                BackgroundColor="#BBBBBB">            
+            <ScrollView Grid.Column="2" x:Name="sbEditPanelScrollView" VerticalOptions="FillAndExpand" WidthRequest="220" Orientation="Vertical" VerticalScrollBarVisibility="Always"
+                BackgroundColor="#BBBBBB">
+                    <VerticalStackLayout x:Name="sbEditPanelVStack">
+                        <!-- AutoFilled with Code Behind -->
+                    </VerticalStackLayout>
             </ScrollView>
         </Grid>
 
