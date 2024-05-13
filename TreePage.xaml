@@ -30,7 +30,7 @@
                     <AbsoluteLayout.GestureRecognizers>
                         <DropGestureRecognizer Drop="OnDropIntoTreeLayout"/>
                         <PointerGestureRecognizer PointerMoved="OnPointerMovedInTreeView" />
-                        <!--<TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>-->
+                        <TapGestureRecognizer Tapped="OnMouseClick_TreeView"/>
                     </AbsoluteLayout.GestureRecognizers>
                 </AbsoluteLayout>
 
