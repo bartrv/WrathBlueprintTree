@@ -2,8 +2,11 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Xml.Linq;
+//using ABI.System.Collections.Generic;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
+//using Microsoft.UI.Xaml.Controls;
 using Windows.Devices.Input;
 //using Windows.UI.Notifications;
 namespace WrathBlueprintTree;
@@ -25,7 +28,8 @@ public partial class TreePage : ContentPage
 		if (XferObject.IsFile == true) 
 		{
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.IngestedBpObjectFlat)) 
-			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer, SideBarPanelVertStack)) 
+			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer, SideBarPanelVertStack)) 
+			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree, this.TreeDropContainer, SideBarPanelVertStack)) 
 			{
 				ThrowAlert();
 			} else {
@@ -102,13 +106,66 @@ public partial class TreePage : ContentPage
 			e.Data.Text = bpModelKey;
         }
 
-	public static void OnMouseClick_PanelSelect(object sender, TappedEventArgs e)
+	public static void OnMouseClick_TreeView(object sender, TappedEventArgs e)
 	{
+		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
+		//if (sender is ScrollView)
+		if (sender is AbsoluteLayout)
+		{
+			ClearPanelSelections(XferObject, sender, "AbsoluteLayout");
+		} 
+		else if (sender is Border)
+		{
+			ClearPanelSelections(XferObject, sender, "Border");
+			SetPanelSelections(XferObject, sender);
+		}
 		Console.WriteLine(sender.ToString());
-		(sender as Border).Stroke = Color.FromRgba("#990000FF");
-		(sender as Border).StrokeThickness = 3;
+		//(sender as Border).Stroke = Color.FromRgba("#990000FF");
+		//(sender as Border).StrokeThickness = 3;
 	}
+	public static void ClearPanelSelections(IDataTransfer XferObject, object sender, string senderType)
+	{
+		//if (sender is AbsoluteLayout parentLayout && parentLayout.AutomationId == "TreeDropContainer")
+		//{
+		//if (senderType == "AbsoluteLayout")
+		//{
+			//TreePage treePageInstance = (sender as VisualElement)?.Parent.Parent.Parent as TreePage;
+			//if (treePageInstance != null)
+			//{
+				//var panels =  XferObject.FullBpTree.BpTreeVM["Panels"] as Dictionary<string,dynamic>;
+				foreach (KeyValuePair<string,dynamic> panelEntry in XferObject.FullBpTree.BpTreeVM["Panels"])
+				//foreach (Dictionary<string,dynamic> panelEntry in panels)
+				{
+					Dictionary<string,dynamic> panelDict = panelEntry.Value as Dictionary<string,dynamic>;
+					//Border panelID = treePageInstance.FindByName<Border>((string)uiPanel.Key);
+					
+					//Border panelObjectContainer = panelDict["GeneratedPanelObject"];
+					//Border panelObjectVisual = panelObjectContainer.FindByName<Border>(panelDict["StyleId"]);
+					Border panelObjectVisual = panelDict["GeneratedViewableObject"];
+					//panelObjectContainer.StrokeThickness = 1;
+					//panelObjectContainer.Stroke = Color.FromRgba("#3333FFFF");
+					panelObjectVisual.StrokeThickness = 1;
+					panelObjectVisual.Stroke = Color.FromRgba("#3333FFFF");
 
+					panelDict["selectState"] = -1;
+					panelDict["strokeThickness"] = 1;
+					panelDict["stroke"] = Color.FromRgba("#3333FFFF");
+				}
+			//}
+		//}
+	}
+	public static void SetPanelSelections(IDataTransfer XferObject, object sender)
+	{
+		var obj = sender as Border;
+		string PanelBpUniqueName = obj.StyleId;
+		
+		XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["selectState"] = 0;
+		//XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderColor"] = Color.FromRgba("#990000FF");
+		//XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderWidth"] = (double)3;
+		Console.WriteLine(PanelBpUniqueName.ToString());
+		obj.Stroke = Color.FromRgba("#990000FF");
+		obj.StrokeThickness = 1;
+	}
 	public async void OnDropIntoTreeLayout(object sender, DropEventArgs e)
 	{
 		string bpModelKey = await e.Data.GetTextAsync();
@@ -280,7 +337,7 @@ public partial class TreePage : ContentPage
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
 
 		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
-		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_PanelSelect(s, e);};
+		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_TreeView(s, e);};
 		bpFrameVisualMain.GestureRecognizers.Add(TapClickEvent);
 
 		// XferObject.FullBpTree.tree[PanelBpUniqueName].Add(tempList);
@@ -309,7 +366,7 @@ public partial class TreePage : ContentPage
 			 RowDefinitions = new RowDefinitionCollection()
 		};
 		RowDefinition rowDef = new RowDefinition{ Height = new GridLength(18, GridUnitType.Absolute) }; //18 = Node rect height + 2
-		//rowDef.Height = 12;
+
 		
 		ColumnDefinition ColOne = new ColumnDefinition();
 		ColumnDefinition ColTwo = new ColumnDefinition();
@@ -431,7 +488,7 @@ public partial class TreePage : ContentPage
 
 		//Add Tap Gesture Recognizer (mouse Click) to each panel for panel selection code
 		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
-		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_PanelSelect(s, e);};
+		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_TreeView(s, e);};
 		bpFrameVisualMain.GestureRecognizers.Add(TapClickEvent);
 
 		VerticalStackLayout bpFrameVisualMainVertLayout = [];
