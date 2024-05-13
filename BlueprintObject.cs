@@ -137,11 +137,9 @@ public class BlueprintObject
 
 			switch (valueToInsert)
 			{
-				case "true":
 				case "True":
 					valueToInsert = (bool)true;
 					break;
-				case "false":
 				case "False":
 					valueToInsert = (bool)false;
 					break;
