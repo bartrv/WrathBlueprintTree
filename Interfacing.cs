@@ -14,6 +14,7 @@ public interface IDataTransfer{
     bool IsChanged { get; set; }  //has current data been changed since loaded
     bool IsNew { get; set; }  //is this data a new tree, not loaded from a file
     bool IsSaved { get; set; } //has the tree been saved/exported since the mose receint change
+    VerticalStackLayout? SidePanelContainer { get; set; }
     BlueprintObject? IngestedBpObject { get; set; }
     Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; }
     FullBpTreeCollection? FullBpTree { get; set; } 
@@ -28,6 +29,7 @@ public class DataTransfer : IDataTransfer
     public bool IsSaved { get; set; } = false; //has the tree been saved/exported since the mose receint change
     public string OpenedFile { get; set; } = "";
     public string OpenedFileFullPath { get; set; } = "";
+    public VerticalStackLayout? SidePanelContainer { get; set; }
     public BlueprintObject? IngestedBpObject { get; set; }
     public Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; } = new();
     private FullBpTreeCollection? _fullBpTree; 
