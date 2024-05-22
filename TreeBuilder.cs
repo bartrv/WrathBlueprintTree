@@ -102,7 +102,7 @@ public partial class TreeBuilder
 		}
 
 	}
-	private static Border GenerateSideBarPanel(string branchName, List<dynamic> sideBarItems)
+	public static Border GenerateSideBarPanel(string branchName, List<dynamic> sideBarItems)
 	{
 		//Frame SideFrameSkeleton = new Frame{BackgroundColor = Color.FromRgba("#BBBBBBFF"), //Visual Frame container
 		Border SideFrameSkeleton = new Border{BackgroundColor = Color.FromRgba("#BBBBBBFF"), //Visual Frame container
@@ -263,7 +263,8 @@ public partial class TreeBuilder
 		{
 			//List<string> AnotherCopyIdx = EntryListItem[i] as List<string>;
 			//string EntryItemKey = EntryListItem[i].Last();
-			List<dynamic> AnotherCopyIdx = new() {"0"};
+			//List<dynamic> AnotherCopyIdx = new() {"0"};
+			List<dynamic> AnotherCopyIdx = new() {};
 			//List<dynamic> AnotherCopyIdxB;
 			string EntryItemKey;
 			if (XferObject.IsFile==true)
@@ -274,7 +275,13 @@ public partial class TreeBuilder
 				//string Test1 = AnotherCopyIdxB[1];
 				EntryItemKey = EntryListEnum.Key as string;
 			} else {
-				AnotherCopyIdx = EntryListEnum.Value as List<dynamic>;
+				//int i = 0;
+				foreach (string item in EntryListEnum.Value as List<string>)
+				{
+					AnotherCopyIdx.Add(item);
+					//i++;
+				}
+				//AnotherCopyIdx = EntryListEnum.Value as List<dynamic>;
 				EntryItemKey = EntryListEnum.Key as string;
 			}
 			
@@ -308,7 +315,7 @@ public partial class TreeBuilder
 							bpNode.ZIndex = 100;
 				}
 
-				AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-18,panelHeight-17,16,16));
+				AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-18,panelHeight-19-16,16,16));
 				 if (AnotherCopyIdx[2] == "node"){bpFrameContainerAbsLayout.Add(bpNode);}
 			} else {
 				//DoDo Add Node identifier to tree data for ingested files

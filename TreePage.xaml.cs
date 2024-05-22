@@ -248,21 +248,35 @@ public partial class TreePage : ContentPage
 
 	public void PlaceNewBpTemplatePanel(AbsoluteLayout targetParent, Point? dropPosition, string bpModelKey)
 	{
-		Frame newGenPanel;
+		//Frame newGenPanel;
 		string PanelBpUniqueName;
 		int panelHeight;
 		int panelWidth;
+		Border newGenPanel;
+		Border visualGenPanel;
+		List<dynamic> sideBarItems;
+		FullBpTreeCollection XferObjectFBPTree = XferObject.FullBpTree;
+
 		if (bpModelKey == "BlueprintProgression") //Currently the only Blueprint in the ListModel that has all of the appropriate data fields to generate the panels
 		{
 			PanelBpUniqueName = BpTreeFlatFileAddTo_PreVM(bpModelKey);
 			BpTreeVmAddTo(PanelBpUniqueName, dropPosition);
 			//(PanelBpName, newGenPanel) = GenerateNewBpTemplatePanelFromListModel(bpModelKey); //Generate Panel Object, this is backwards... Should Add/populate FlatFileData 1st, then generate VM, THEN VMMV
-			(newGenPanel, panelHeight, panelWidth) = GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName);
-			//*** ToDo Update the above line and underlying method to this format: (newGenPanel, visualGenPanel, panelHeight, panelWidth, sideBarItems) = TreeBuilder.GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName, XferObjectFBPTree);
+			//(newGenPanel, panelHeight, panelWidth) = GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName);
+			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "Seed");
+			(newGenPanel, visualGenPanel, panelHeight, panelWidth, sideBarItems) = TreeBuilder.GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName, XferObjectFBPTree);
+			
+			XferObjectFBPTree.BpTreeVM["Panels"][PanelBpUniqueName].Add("rect", new Rect(dropPosition.Value.X,dropPosition.Value.Y,panelWidth+16,panelHeight));
 
 			AbsoluteLayout.SetLayoutBounds(newGenPanel, new Rect(dropPosition.Value.X,dropPosition.Value.Y,panelWidth+16,panelHeight)); //Assign relative location and size data to panel object
-			targetParent.Add(newGenPanel); // Assign panel to ScrollFrame (Absolute Layout)
-			
+			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "Panel", newGenPanel);
+			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "Viewable", visualGenPanel);
+			//targetParent.Add(newGenPanel); // Assign panel to ScrollFrame (Absolute Layout)
+			targetParent.Add(XferObjectFBPTree.BpTreeVM["Panels"][PanelBpUniqueName]["GeneratedPanelObject"]);
+			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "SideItems", sideBarItems);
+			Border sideBarPanel = TreeBuilder.GenerateSideBarPanel(PanelBpUniqueName, XferObjectFBPTree.BpTreeVM["Panels"][PanelBpUniqueName]["SideBarItems"]);
+			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "SidePanel", sideBarPanel);
+
 		} else{
 			(PanelBpUniqueName, newGenPanel) = GenerateNewBpTemplatePanel(bpModelKey); //Generate Panel Object
 			AbsoluteLayout.SetLayoutBounds(newGenPanel, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400)); //Assign relative location and size data to panel object
@@ -499,7 +513,7 @@ public partial class TreePage : ContentPage
 
 		return (bpFrameContainer, panelHeight, panelWidth);
 	}
-	public (string, Frame) GenerateNewBpTemplatePanel(string bpModelKey) //New empty panel generator - pulls data fields from BlueprintModels 
+	public (string, Border) GenerateNewBpTemplatePanel(string bpModelKey) //New empty panel generator - pulls data fields from BlueprintModels 
 	{
 		//var dropData = "testData";
 		int testWidth = 200;
@@ -509,13 +523,14 @@ public partial class TreePage : ContentPage
 		string PanelBpName = $"${PanelBpNameBase}${Guid.NewGuid()}";
 
 
-		Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+		Border bpFrameContainer = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										CornerRadius = 0
+										//CornerRadius = 0
 										};
 		AbsoluteLayout bpFrameContainerAbsLayout = [];
 		
+		//Node Box/circle/Disc
 		BoxView bpNode = new BoxView{BackgroundColor = Color.FromRgba("#BBBBBBFF"),
 						Margin = new Thickness (0,0),
 						//WidthRequest = 16,
