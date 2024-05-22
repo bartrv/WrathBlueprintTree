@@ -28,7 +28,7 @@
                 <AbsoluteLayout x:Name="TreeDropContainer">
                 
                     <AbsoluteLayout.GestureRecognizers>
-                        <DropGestureRecognizer Drop="OnDropIntoTreeLayout"/>
+                        <DropGestureRecognizer DragOver="OnDragOver" Drop="OnDropIntoTreeLayout"/>
                         <PointerGestureRecognizer PointerMoved="OnPointerMovedInTreeView" />
                         <TapGestureRecognizer Tapped="OnMouseClick_TreeView"/>
                     </AbsoluteLayout.GestureRecognizers>
