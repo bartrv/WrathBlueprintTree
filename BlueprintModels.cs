@@ -9,7 +9,7 @@ using System.Collections.Specialized;
 namespace WrathBlueprintTree;
 
 public class BlueprintModels{
-    // This Model is !!!READ ONLY!!!
+    // This Model should be !!!READ ONLY!!!
     // Once initialized, this should be only for *building the templates* used for bluwprint visualization/construction
     // NOT for saving any data.
     // The BlueprintObject Class should be re-instantiated as a new object for the user's working blueprint link map, 
@@ -19,6 +19,12 @@ public class BlueprintModels{
     // Since there is the "Object" ingested template and the "Flat" version, Duplicate-ish code blocks are testing which version is more friendly to the BPModel build/use.
     //       (Leaning toward Flat)
     //eg. {Data.Components[0].type}
+
+    // That said... IFF a NEW Blueprint type is discovered, a new Bp model template chould be generated ON USER REQUEST that could be added to this Library
+    // The library would need to be converted to a save/load format to account for this or any new templates will be lost on Close/Exit
+    // That's a future problem.  Get the existing test entries unified and working first.  
+    // Once there is sufficient variation in the Library item types and needs AND everything is working, THEN look into IO operations that support persistent data in the BlueprintModels Object.
+    
     private static Dictionary<string,dynamic> _modelDictionary = [];
     //Dictionary<string, dynamic> bpDict = [];
 
