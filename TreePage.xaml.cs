@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.Windows.Input;
 using System.Xml.Linq;
 //using ABI.System.Collections.Generic;
+using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui;
 using Microsoft.Maui.Controls.Shapes;
 //using Microsoft.UI.Xaml.Controls;
-using Windows.Devices.Input;
+//using Windows.Devices.Input;
+using Microsoft.Maui.Animations;
 //using Windows.UI.Notifications;
 namespace WrathBlueprintTree;
 
@@ -24,12 +27,13 @@ public partial class TreePage : ContentPage
         //int btnI = 0;
         int ButtonCount = BlueprintModels.ModelDictionary.Count;
 		generateTreePageButtonList(); //Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
-		VerticalStackLayout? SideBarPanelVertStack = FindByName("sbEditPanelVStack") as VerticalStackLayout;
+		XferObject.SidePanelContainer = FindByName("sbEditPanelVStack") as VerticalStackLayout;
+		//VerticalStackLayout? SideBarPanelVertStack = FindByName("sbEditPanelVStack") as VerticalStackLayout;
 		if (XferObject.IsFile == true) 
 		{
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.IngestedBpObjectFlat)) 
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer, SideBarPanelVertStack)) 
-			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree, this.TreeDropContainer, SideBarPanelVertStack)) 
+			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree, this.TreeDropContainer)) 
 			{
 				ThrowAlert();
 			} else {
@@ -82,15 +86,19 @@ public partial class TreePage : ContentPage
 			}
 			newFrame.Content = frameLabel;
 
+			//Drag Gesture definition
 			DragGestureRecognizer DragFrame = new()
             {
                 CanDrag = true
+				//AllowedOperations = DataPackageOperation.Copy -> suggested fromChat - seems to not exist
             };
+			
 			//DragFrame.DragStarting += OnDragStarting; - with a little explanation of the DragStarting notation from ChatGPT 
-			DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, entry.Key); // final suggestion from Chat
+			DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, entry.Key, "MainMenuListItem"); // final suggestion from Chat
+			//Attach (Add) Drag Gesture definition and actions to newFrame
 			newFrame.GestureRecognizers.Add(DragFrame);
 			
-            treeDragListA.Add(newFrame);
+            treeDragListA.Add(newFrame); //Append the just built button to the main option menu VerticalLayout object
         } 
 	}
 
@@ -99,12 +107,28 @@ public partial class TreePage : ContentPage
 		relativeToContainerPosition = e.GetPosition((View)sender);
 		Console.WriteLine(relativeToContainerPosition);
 	}
+	//public static void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey)
+	public static void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey, string dragItemContext)
+	{
+		//Border? senderParent = (GestureRecognizer)sender.Parent;
+		Console.WriteLine($"Frame dragged! : {bpModelKey}");
+		//Point? mousePanelOffset = new();
 
-	public void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey)
-        {
-            Console.WriteLine($"Frame dragged! : {bpModelKey}");
-			e.Data.Text = bpModelKey;
-        }
+		Point? mousePanelOffset = e.GetPosition((sender as Element)?.Parent);
+
+		//e.Data.Text = bpModelKey;
+		e.Data.Text = bpModelKey+","+dragItemContext+","+mousePanelOffset.Value.X+","+mousePanelOffset.Value.Y;
+	}
+
+	public static void OnDragOver(object? sender, DragEventArgs e)
+	{
+		//e.AcceptedOperation = DataPackageOperation.None; 
+		#if WINDOWS
+			var dragUI = e.PlatformArgs.DragEventArgs.DragUIOverride;
+			dragUI.IsCaptionVisible = false;
+			dragUI.IsGlyphVisible = false;
+		#endif
+	}
 
 	public static void OnMouseClick_TreeView(object sender, TappedEventArgs e)
 	{
@@ -151,6 +175,7 @@ public partial class TreePage : ContentPage
 					panelDict["strokeThickness"] = 1;
 					panelDict["stroke"] = Color.FromRgba("#3333FFFF");
 				}
+				XferObject.SidePanelContainer.Clear();
 			//}
 		//}
 	}
@@ -165,46 +190,79 @@ public partial class TreePage : ContentPage
 		Console.WriteLine(PanelBpUniqueName.ToString());
 		obj.Stroke = Color.FromRgba("#990000FF");
 		obj.StrokeThickness = 1;
+
+		// This is for Referance : TreeBuilder.cs -> GenerateTreeFromFileData () // XferObjectFBPTree.BpTreeVM["Panels"][PanelBpUniqueName].Add("SideBarObject",sideBarPanel); //trying assigning the Side Bar <Border> Object to it's associated "Panels" Entry
+		XferObject.SidePanelContainer.Add(XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["SidePanelObject"]); // Append the generated side panel int he interface VM to the SidePanelContainer
 	}
 	public async void OnDropIntoTreeLayout(object sender, DropEventArgs e)
 	{
-		string bpModelKey = await e.Data.GetTextAsync();
+		//string bpModelKey = await e.Data.GetTextAsync();
+		string dropDataString = await e.Data.GetTextAsync();
+		List<string> dragData = dropDataString.Split(',').ToList();
+		string bpModelKeyOrUniqueName = dragData[0];
+		string dragItemContext = dragData[1];
+
 		Console.WriteLine(sender.ToString());
 		Console.WriteLine(e.ToString());
-		Console.WriteLine($"bpModelKey: {bpModelKey}");
+		Console.WriteLine($"bpModelKey: {bpModelKeyOrUniqueName}");
 		object bpModelReferanceObject;
-		if (BlueprintModels.GetBpModel(bpModelKey, out bpModelReferanceObject)) //verify model data exists in model library and extract lib referance before generating panel
-		{ 
+		if (dragItemContext == "MainMenuListItem")
+		{
+			string bpModelKey = bpModelKeyOrUniqueName;
+			if (BlueprintModels.GetBpModel(bpModelKey, out bpModelReferanceObject)) //verify model data exists in model library and extract lib referance before generating panel
+			{ 
 
+				AbsoluteLayout? senderParent = (sender as Element)?.Parent as AbsoluteLayout; // grab Frame layout object that received drop and re-assert the coordinate system
+				Console.WriteLine(senderParent.ToString());
+				//Console.WriteLine((sender);
+				relativeToContainerPosition = e.GetPosition((sender as Element)?.Parent); // grab the drop location from drop event args
+				//if (relativeToContainerPosition!=null){
+					//Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
+					//Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
+				//}
+				PlaceNewBpTemplatePanel(senderParent, relativeToContainerPosition, bpModelKey); //call new panel generation method and attach it to the parent Frame at the Drop location
+			} else {
+				Console.WriteLine("Exception!! BlueprintModels Dictionaty key not found, this should be immpossible. TreePage.OnDropIntoTreeLayout");
+			}
+		} 
+		else if (dragItemContext == "ExistingPanel")
+		{
+			string PanelBpUniqueName = bpModelKeyOrUniqueName;
 			AbsoluteLayout? senderParent = (sender as Element)?.Parent as AbsoluteLayout; // grab Frame layout object that received drop and re-assert the coordinate system
-			Console.WriteLine(senderParent.ToString());
-			//Console.WriteLine((sender);
 			relativeToContainerPosition = e.GetPosition((sender as Element)?.Parent); // grab the drop location from drop event args
-			//if (relativeToContainerPosition!=null){
-				//Console.WriteLine($"X = {relativeToContainerPosition.Value.X}");
-				//Console.WriteLine($"Y = {relativeToContainerPosition.Value.Y}");
-			//}
-			placeNewBpTemplatePanel(senderParent, relativeToContainerPosition, bpModelKey); //call new panel generation method and attach it to the parent Frame at the Drop location
-		} else {
-			Console.WriteLine("Exception!! BlueprintModels Dictionaty key not found, this should be immpossible. TreePage.OnDropIntoTreeLayout");
+			RepositionExistingPanel(senderParent, relativeToContainerPosition, PanelBpUniqueName, dragData);
 		}
 		// Perform logic to take action based on retrieved value.
 	}
 
-	public void placeNewBpTemplatePanel(AbsoluteLayout targetParent, Point? dropPosition, string bpModelKey)
+	public void RepositionExistingPanel(AbsoluteLayout? senderParent, Point? relativeToContainerPosition, string PanelBpUniqueName, List<string> dragData)
+	{
+		SizeF? relativeOffsetVector = new SizeF(float.Parse(dragData[2]),float.Parse(dragData[3])); //using the relative cursor position from the moved sender to the mouse create an offset vector
+		relativeToContainerPosition -= relativeOffsetVector; //subtract the offset vector from the drop location so the new panel location is observable as well as predictable.
+
+		Console.WriteLine(PanelBpUniqueName+": Old Point =>"+XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["rect"].Location);
+		XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["rect"].Location = relativeToContainerPosition ?? new Point(0,0);
+		Console.WriteLine(PanelBpUniqueName+": New Point =>"+XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["rect"].Location);
+		AbsoluteLayout.SetLayoutBounds((Border)XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["GeneratedPanelObject"],(Rect)XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["rect"]);
+	}
+
+	public void PlaceNewBpTemplatePanel(AbsoluteLayout targetParent, Point? dropPosition, string bpModelKey)
 	{
 		Frame newGenPanel;
 		string PanelBpUniqueName;
 		int panelHeight;
 		int panelWidth;
-		if (bpModelKey == "BlueprintProgression") {
+		if (bpModelKey == "BlueprintProgression") //Currently the only Blueprint in the ListModel that has all of the appropriate data fields to generate the panels
+		{
 			PanelBpUniqueName = BpTreeFlatFileAddTo_PreVM(bpModelKey);
 			BpTreeVmAddTo(PanelBpUniqueName, dropPosition);
 			//(PanelBpName, newGenPanel) = GenerateNewBpTemplatePanelFromListModel(bpModelKey); //Generate Panel Object, this is backwards... Should Add/populate FlatFileData 1st, then generate VM, THEN VMMV
 			(newGenPanel, panelHeight, panelWidth) = GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName);
+			//*** ToDo Update the above line and underlying method to this format: (newGenPanel, visualGenPanel, panelHeight, panelWidth, sideBarItems) = TreeBuilder.GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName, XferObjectFBPTree);
 
 			AbsoluteLayout.SetLayoutBounds(newGenPanel, new Rect(dropPosition.Value.X,dropPosition.Value.Y,panelWidth+16,panelHeight)); //Assign relative location and size data to panel object
-			targetParent.Add(newGenPanel); // Assign panel to Frame
+			targetParent.Add(newGenPanel); // Assign panel to ScrollFrame (Absolute Layout)
+			
 		} else{
 			(PanelBpUniqueName, newGenPanel) = GenerateNewBpTemplatePanel(bpModelKey); //Generate Panel Object
 			AbsoluteLayout.SetLayoutBounds(newGenPanel, new Rect(dropPosition.Value.X,dropPosition.Value.Y,200,400)); //Assign relative location and size data to panel object
@@ -259,9 +317,7 @@ public partial class TreePage : ContentPage
 			}
 
 		}
-		
 		return PanelBpUniqueName;
-
 	}
 
 	private void BpTreeFlatFileAddTo(string PanelBpName, string bpModelKey)
