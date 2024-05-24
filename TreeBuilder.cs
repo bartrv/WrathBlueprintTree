@@ -194,7 +194,7 @@ public partial class TreeBuilder
 		int panelHeight = 36;
 
 		//Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
-		Border bpFrameContainer = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
+		Border bpFrameContainer = new Border{BackgroundColor = Color.FromRgba("#EEEEEE77"), //Overall Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
 										// CornerRadius = 0 Frame Styling option
@@ -324,9 +324,6 @@ public partial class TreeBuilder
 							//bpNode.ZIndex = 100;
 							bpNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank");
 				}
-				//if (AnotherCopyIdx[2] == "node"){
-				//			bpNode.SetDynamicResource(BoxView.StyleProperty, "NodeBlank");
-				//}
 
 				AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-18,panelHeight-19-16,16,16));
 				AbsoluteLayout.SetLayoutFlags(bpNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behaviot - Perhapse only relevant to using the Ellipse element
@@ -344,10 +341,21 @@ public partial class TreeBuilder
 		bpFrameVisualMainVertLayout.Add(panelLayoutGrid);
 		bpFrameVisualMain.Content = bpFrameVisualMainVertLayout;
 
+		//Drag Gesture definition for repositioning panel using the Visual/viewable border group
+		DragGestureRecognizer DragFrame = new()
+		{
+			CanDrag = true
+		};
+		//DragFrame.DragStarting += OnDragStarting; - with a little explanation of the DragStarting notation from ChatGPT 
+		DragFrame.DragStarting += (sender, e) => TreePage.OnDragStarting(sender, e, PanelBpUniqueName, "ExistingPanel"); // final suggestion from Chat
+		//Attach (Add) Drag Gesture definition and actions to newFrame
+		bpFrameVisualMain.GestureRecognizers.Add(DragFrame);
+
 		bpFrameContainerAbsLayout.Add(bpFrameVisualMain);
 		//bpFrameContainerAbsLayout.Add(bpNode);
 		bpFrameContainer.Content = bpFrameContainerAbsLayout;
 
+		/* This works for the Entire frame, both visual and container (The 'bpFrameContainer' is visible currently only to help with debugging)
 		//Drag Gesture definition for repositioning panel
 		DragGestureRecognizer DragFrame = new()
 		{
@@ -357,7 +365,7 @@ public partial class TreeBuilder
 		DragFrame.DragStarting += (sender, e) => TreePage.OnDragStarting(sender, e, PanelBpUniqueName, "ExistingPanel"); // final suggestion from Chat
 		//Attach (Add) Drag Gesture definition and actions to newFrame
 		bpFrameContainer.GestureRecognizers.Add(DragFrame);
-
+		*/
 		return (bpFrameContainer, bpFrameVisualMain, panelHeight, panelWidth, sideBarItems);
 	}
 
