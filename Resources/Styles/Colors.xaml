@@ -28,6 +28,11 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <Color x:Key="TreeInfill_C">#8899AAFF</Color>
+    <Color x:Key="TreeInfill_D">#88EE88FF</Color>
+    <Color x:Key="ErrorRed">#DD4455FF</Color>
+    <Color x:Key="TreeBorder_C">#777777FF</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
@@ -42,4 +47,6 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <SolidColorBrush x:Key="NodeBlankBrush" Color="{StaticResource TreeInfill_C}"/>
 </ResourceDictionary>

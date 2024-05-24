@@ -23,6 +23,33 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
+    <Style TargetType="Ellipse" x:Key="NodeBlank">
+        <Setter Property="Fill" Value="{StaticResource NodeBlankBrush}" />
+        <Setter Property="WidthRequest" Value="16" />
+        <Setter Property="HeightRequest" Value="16" />
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Stroke" Value="{StaticResource Gray950}"/>
+        <Setter Property="ZIndex" Value="100" />
+    </Style>
+
+    <Style TargetType="Ellipse" x:Key="NodeConnected">
+        <Setter Property="Fill" Value="{StaticResource TreeInfill_D}" />
+        <Setter Property="WidthRequest" Value="16" />
+        <Setter Property="HeightRequest" Value="16" />
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Stroke" Value="{StaticResource Gray950}"/>
+        <Setter Property="ZIndex" Value="100" />
+    </Style>
+
+    <Style TargetType="Ellipse" x:Key="NodeError">
+        <Setter Property="Fill" Value="{StaticResource ErrorRed}" />
+        <Setter Property="WidthRequest" Value="16" />
+        <Setter Property="HeightRequest" Value="16" />
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Stroke" Value="{StaticResource Gray950}"/>
+        <Setter Property="ZIndex" Value="100" />
+    </Style>
+
     <Style TargetType="Button">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />

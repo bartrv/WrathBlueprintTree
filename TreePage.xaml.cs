@@ -211,7 +211,6 @@ public partial class TreePage : ContentPage
 			string bpModelKey = bpModelKeyOrUniqueName;
 			if (BlueprintModels.GetBpModel(bpModelKey, out bpModelReferanceObject)) //verify model data exists in model library and extract lib referance before generating panel
 			{ 
-
 				AbsoluteLayout? senderParent = (sender as Element)?.Parent as AbsoluteLayout; // grab Frame layout object that received drop and re-assert the coordinate system
 				Console.WriteLine(senderParent.ToString());
 				//Console.WriteLine((sender);

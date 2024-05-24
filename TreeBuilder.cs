@@ -291,7 +291,8 @@ public partial class TreeBuilder
 
 			Console.WriteLine("EntryItemKey:"+EntryItemKey);
 			Console.WriteLine("AnotherCopyIdx:"+AnotherCopyIdx);
-			BoxView bpNode = new BoxView{};
+			//BoxView bpNode = new BoxView{};
+			Ellipse bpNode = new Ellipse{};
 			var TempVMLabelForLoop = new Label{
 											Text = EntryItemKey,
 											//Text = AnotherCopyIdx.Last(),
@@ -306,16 +307,30 @@ public partial class TreeBuilder
 			panelLayoutGrid.Children.Add(TempVMLabelForLoop);
 
 			if (XferObject.IsFile != true){
-				if (AnotherCopyIdx[2] == "node"){
+				/* if (AnotherCopyIdx[2] == "node"){ //Code for BoxView styling
 							bpNode.BackgroundColor = Color.FromRgba("#CCBBBBFF");
 							bpNode.Margin = new Thickness (0,0);
 							bpNode.WidthRequest = 16;
 							bpNode.HeightRequest = 16;
 							bpNode.CornerRadius = 8;
 							bpNode.ZIndex = 100;
+					} */
+				if (AnotherCopyIdx[2] == "node"){ //Code for Ellipse styling
+							//bpNode.Fill = new SolidColorBrush(Color.FromRgba("#CCBBBBFF"));
+							//bpNode.WidthRequest = 16;
+							//bpNode.HeightRequest = 16;
+							//bpNode.Stroke = Color.FromRgba("#444444FF");
+							//bpNode.StrokeThickness = 1;
+							//bpNode.ZIndex = 100;
+							bpNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank");
 				}
+				//if (AnotherCopyIdx[2] == "node"){
+				//			bpNode.SetDynamicResource(BoxView.StyleProperty, "NodeBlank");
+				//}
 
 				AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-18,panelHeight-19-16,16,16));
+				AbsoluteLayout.SetLayoutFlags(bpNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behaviot - Perhapse only relevant to using the Ellipse element
+
 				 if (AnotherCopyIdx[2] == "node"){bpFrameContainerAbsLayout.Add(bpNode);}
 			} else {
 				//DoDo Add Node identifier to tree data for ingested files
