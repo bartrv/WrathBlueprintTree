@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
-using System.Net.Cache;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using System.ComponentModel;
+//using Microsoft.Extensions.Logging;
+//using Microsoft.VisualBasic;
+//using System.Net.Cache;
+//using System.Runtime.CompilerServices;
+//using System.Collections.Generic;
+//using System.ComponentModel;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace WrathBlueprintTree;
 
@@ -18,6 +19,10 @@ public interface IDataTransfer{
     BlueprintObject? IngestedBpObject { get; set; }
     Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; }
     FullBpTreeCollection? FullBpTree { get; set; } 
+    List<double> NewLinkLineParameters { get; set; }
+    Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; }
+    PathFigure NewLinkPathFigure { get; set; }
+    BezierSegment NewLinkBezierSegment { get; set; }
 }
 
 public class DataTransfer : IDataTransfer
@@ -31,9 +36,12 @@ public class DataTransfer : IDataTransfer
     public string OpenedFileFullPath { get; set; } = "";
     public VerticalStackLayout? SidePanelContainer { get; set; }
     public BlueprintObject? IngestedBpObject { get; set; }
-    public Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; } = new();
-    private FullBpTreeCollection? _fullBpTree; 
+    public Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; } = [];
     public FullBpTreeCollection? FullBpTree { get; set; }
+    public List<double> NewLinkLineParameters {get; set;} = new();
+    public Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; } = new();
+    public PathFigure NewLinkPathFigure { get; set; } = new();
+    public BezierSegment NewLinkBezierSegment { get; set; } = new();
    /*
     public FullBpTreeCollection? FullBpTree 
     { 

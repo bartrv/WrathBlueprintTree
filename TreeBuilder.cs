@@ -7,15 +7,19 @@ using System.Collections.Specialized;
 //using Windows.ApplicationModel.Email;
 namespace WrathBlueprintTree;
 
-public partial class TreeBuilder
+public partial class TreeBuilder : TreePage
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
+
 	//AbsoluteLayout targetParent;
     //public static bool GenerateTreeFromFileData(Dictionary<string,dynamic> XferObjectFBPTree, AbsoluteLayout? targetParent = null, VerticalStackLayout? SideBarPanelVertStack = null) //SideBarPanelVertStack added for testing VM object access
-  	 public static bool GenerateTreeFromFileData(FullBpTreeCollection XferObjectFBPTree, AbsoluteLayout? targetParent = null) //SideBarPanelVertStack added for testing VM object access
+  	 //public bool GenerateTreeFromFileData(FullBpTreeCollection XferObjectFBPTree, AbsoluteLayout? targetParent = null) //SideBarPanelVertStack added for testing VM object access
+	 public static bool GenerateTreeFromFileData(AbsoluteLayout targetParent) //SideBarPanelVertStack added for testing VM object access
     {
 		//IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 		//Frame newGenPanel;
+		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
+		FullBpTreeCollection XferObjectFBPTree = XferObject.FullBpTree;
 		Border newGenPanel;
 		Border visualGenPanel;
 
@@ -176,6 +180,7 @@ public partial class TreeBuilder
 		return SideFrameSkeleton;
 	}
 	
+	//
 	public static (Border, Border, int, int, List<dynamic>) GenerateNewBpTemplatePanelFromListModel(string PanelBpUniqueName, FullBpTreeCollection XferObjectFBPTree)
 	{
 		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
@@ -220,9 +225,17 @@ public partial class TreeBuilder
 										//BindingContext = panelData,
 
 										};
+		Ellipse bpAnchorLinkNode = new Ellipse{};
+		bpAnchorLinkNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank"); //Assign XAML style template to node Ellipse
+		// set up Drag gesture to fire the link line generation
+		DragGestureRecognizer AnchorNodeDragGesture = new();
+		AnchorNodeDragGesture.DragStarting += (sender, e) => OnDragStarting(sender, e, PanelBpUniqueName, "AnchorNodeStart"); 
+		//Attach (Add) Drag Gesture definition and actions to current Node
+		bpAnchorLinkNode.GestureRecognizers.Add(AnchorNodeDragGesture);
+		AbsoluteLayout.SetLayoutBounds(bpAnchorLinkNode, new Rect(0,0,16,16));
+		AbsoluteLayout.SetLayoutFlags(bpAnchorLinkNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behavior - Perhapse only relevant to using the Ellipse element
 
-		//bpFrameVisualMain.SetBinding(Border.StrokeProperty,"borderColor");
-		//bpFrameVisualMain.SetBinding(Border.StrokeThicknessProperty,"borderWidth");						
+						
 		//Add Tap Gesture Recognizer (mouse Click) to each panel for panel selection code
 		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
 		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_TreeView(s, e);};
@@ -315,18 +328,26 @@ public partial class TreeBuilder
 							bpNode.CornerRadius = 8;
 							bpNode.ZIndex = 100;
 					} */
-				if (AnotherCopyIdx[2] == "node"){ //Code for Ellipse styling
+				if (AnotherCopyIdx[2] == "node"){ 
 							//bpNode.Fill = new SolidColorBrush(Color.FromRgba("#CCBBBBFF"));
 							//bpNode.WidthRequest = 16;
 							//bpNode.HeightRequest = 16;
 							//bpNode.Stroke = Color.FromRgba("#444444FF");
 							//bpNode.StrokeThickness = 1;
 							//bpNode.ZIndex = 100;
-							bpNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank");
+							bpNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank"); //Assign XAML style template to node Ellipse
+							
+							// set up Drag gesture to fire the link line generation
+							DragGestureRecognizer DragNodeLink = new();
+							DragNodeLink.DragStarting += (sender, e) => OnDragStarting(sender, e, PanelBpUniqueName, "LinkNodeStart"); 
+							//Attach (Add) Drag Gesture definition and actions to current Node
+							bpNode.GestureRecognizers.Add(DragNodeLink);
+							
+
 				}
 
 				AbsoluteLayout.SetLayoutBounds(bpNode, new Rect(panelWidth-18,panelHeight-19-16,16,16));
-				AbsoluteLayout.SetLayoutFlags(bpNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behaviot - Perhapse only relevant to using the Ellipse element
+				AbsoluteLayout.SetLayoutFlags(bpNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behavior - Perhapse only relevant to using the Ellipse element
 
 				 if (AnotherCopyIdx[2] == "node"){bpFrameContainerAbsLayout.Add(bpNode);}
 			} else {
@@ -336,6 +357,8 @@ public partial class TreeBuilder
 			panelHeight = panelHeight+18;
 			
 		}
+		bpFrameContainerAbsLayout.Add(bpAnchorLinkNode);
+
 		AbsoluteLayout.SetLayoutBounds(bpFrameVisualMain, new Rect(10,0,panelWidth-20, panelHeight-4)); //Set width, height of Visual Container based on Generated Content
 
 		bpFrameVisualMainVertLayout.Add(panelLayoutGrid);
@@ -347,11 +370,12 @@ public partial class TreeBuilder
 			CanDrag = true
 		};
 		//DragFrame.DragStarting += OnDragStarting; - with a little explanation of the DragStarting notation from ChatGPT 
-		DragFrame.DragStarting += (sender, e) => TreePage.OnDragStarting(sender, e, PanelBpUniqueName, "ExistingPanel"); // final suggestion from Chat
+		DragFrame.DragStarting += (sender, e) => OnDragStarting(sender, e, PanelBpUniqueName, "ExistingPanel"); // final suggestion from Chat
 		//Attach (Add) Drag Gesture definition and actions to newFrame
 		bpFrameVisualMain.GestureRecognizers.Add(DragFrame);
 
 		bpFrameContainerAbsLayout.Add(bpFrameVisualMain);
+		
 		//bpFrameContainerAbsLayout.Add(bpNode);
 		bpFrameContainer.Content = bpFrameContainerAbsLayout;
 

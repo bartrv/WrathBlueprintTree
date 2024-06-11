@@ -11,15 +11,21 @@ using Microsoft.Maui.Controls.Shapes;
 //using Microsoft.UI.Xaml.Controls;
 //using Windows.Devices.Input;
 using Microsoft.Maui.Animations;
+//using Windows.Media.Capture.Core;
+using Microsoft.Maui.Controls.Platform;
+using Microsoft.Maui.Layouts;
+//using Microsoft.UI.Xaml.Input;
+//using Microsoft.Maui.Graphics.Win2D;
 //using Windows.UI.Notifications;
+
 namespace WrathBlueprintTree;
 
 public partial class TreePage : ContentPage
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
-	//Dictionary<string,string> ButtonList = [];
+
 	Point? relativeToContainerPosition;
-    //Dictionary<string,dynamic> TreeViewMVVM = [];
+
 	public TreePage()
 	{
 		InitializeComponent();
@@ -33,7 +39,12 @@ public partial class TreePage : ContentPage
 		{
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.IngestedBpObjectFlat)) 
 			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree.tree, this.TreeDropContainer, SideBarPanelVertStack)) 
-			if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree, this.TreeDropContainer)) 
+			//if (!TreeBuilder.GenerateTreeFromFileData(XferObject.FullBpTree, this.TreeDropContainer))
+			//TreeBuilder testitem = new TreeBuilder();
+			
+			//if (!TreeBuilder.GenerateTreeFromFileData(TreeDropContainer))
+			if (!TreeBuilder.GenerateTreeFromFileData(TreeDropContainer)) 
+			//if (!TreeBuilder.mehh(XferObject.FullBpTree, this.TreeDropContainer)) 
 			{
 				ThrowAlert();
 			} else {
@@ -45,11 +56,51 @@ public partial class TreePage : ContentPage
 			XferObject.IsNew = true;
 			XferObject.IsSaved = false;
 		}
+		XferObject.NewLinkPathFigure = new();
+		PathGeometry pathGeometry = new();
+    	//Microsoft.Maui.Controls.Shapes.Path newLinkDragPath = new();
+		//Point newLinkStartPoint = new Point(0, 0);
+		XferObject.NewLinkPath = new();
+		XferObject.NewLinkBezierSegment = new();
+		//BezierSegment newLinkBezierSegment = new();
+		pathGeometry.Figures.Add(XferObject.NewLinkPathFigure);
+
+		// Add the PathGeometry to a Path element
+		//var path = new Microsoft.Maui.Controls.Shapes.Path { 
+		//	Data = pathGeometry,
+		//	Stroke = Colors.Black,
+        //    StrokeThickness = 2
+		//	};
+		XferObject.NewLinkPath.Data = pathGeometry;
+		XferObject.NewLinkPath.Stroke = Colors.Black;
+		XferObject.NewLinkPath.StrokeThickness = 2;
+
+		//AbsoluteLayout.SetLayoutBounds(path, new Rect(0,0,200,200));
+		AbsoluteLayout.SetLayoutFlags(XferObject.NewLinkPath, AbsoluteLayoutFlags.None);
+		TreeDropContainer.Children.Add(XferObject.NewLinkPath);
+
+		// Create a BezierSegment
+		//var bezierSegment = new BezierSegment
+		//{
+		//	Point1 = new Point(50, 50),
+		//	Point2 = new Point(100, 0),
+		//	Point3 = new Point(150, 50)
+		//};
+		XferObject.NewLinkLineParameters = [0,0,0,50,10,50,50,100,50];
+
+		XferObject.NewLinkPathFigure.StartPoint = new Point(XferObject.NewLinkLineParameters[1],XferObject.NewLinkLineParameters[2]);
+		XferObject.NewLinkPathFigure.Segments.Add(XferObject.NewLinkBezierSegment);
+		//newLinkStartPoint = new Point(0,0);
+		XferObject.NewLinkBezierSegment.Point1 = new Point(XferObject.NewLinkLineParameters[3],XferObject.NewLinkLineParameters[4]);
+		XferObject.NewLinkBezierSegment.Point2 = new Point(XferObject.NewLinkLineParameters[5],XferObject.NewLinkLineParameters[6]);
+		XferObject.NewLinkBezierSegment.Point3 = new Point(XferObject.NewLinkLineParameters[7],XferObject.NewLinkLineParameters[8]);
+
+		
 	}
 
 	async public static void ThrowAlert()
 	{
-			bool x =  await Application.Current.MainPage.DisplayAlert("Title","Hello","OK","NotOK");
+			bool x =  await Application.Current.MainPage.DisplayAlert("Title","GenerateTreeFromFileData failed","OK","NotOK");
 	}
 	private void generateTreePageButtonList()
 	{
@@ -106,18 +157,89 @@ public partial class TreePage : ContentPage
 	{
 		relativeToContainerPosition = e.GetPosition((View)sender);
 		Console.WriteLine(relativeToContainerPosition);
+		
+
+		if (XferObject.NewLinkLineParameters[0] != 0)  //When generating a new link line, this manages the Bezier Curve redraw cycle.  
+		{
+			//Console.WriteLine("ScrollView.ContentSize: "+treeScrollView.ContentSize.Width);
+			AbsoluteLayout.SetLayoutBounds(XferObject.NewLinkPath, new Rect(0,0,treeScrollView.ContentSize.Width,treeScrollView.ContentSize.Height));
+			XferObject.NewLinkPathFigure.StartPoint = new Point(XferObject.NewLinkLineParameters[1], XferObject.NewLinkLineParameters[2]);
+			XferObject.NewLinkBezierSegment.Point1 = new Point(XferObject.NewLinkLineParameters[3], XferObject.NewLinkLineParameters[4]);
+			if (XferObject.NewLinkLineParameters[0] == 1)
+			{		
+				XferObject.NewLinkBezierSegment.Point2 = new Point(relativeToContainerPosition.Value.X-50,relativeToContainerPosition.Value.Y);
+			} 
+			else if (XferObject.NewLinkLineParameters[0] == 2)
+			{
+				XferObject.NewLinkBezierSegment.Point2 = new Point(relativeToContainerPosition.Value.X+50,relativeToContainerPosition.Value.Y);
+			}
+			XferObject.NewLinkBezierSegment.Point3 = new Point(relativeToContainerPosition.Value.X,relativeToContainerPosition.Value.Y);
+		}
+
 	}
-	//public static void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey)
+
 	public static void OnDragStarting(object? sender, DragStartingEventArgs e, string bpModelKey, string dragItemContext)
 	{
 		//Border? senderParent = (GestureRecognizer)sender.Parent;
+		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
+
 		Console.WriteLine($"Frame dragged! : {bpModelKey}");
 		//Point? mousePanelOffset = new();
+		XferObject.NewLinkLineParameters[0] = 0; //Regardless, the stert of a drag operation should cancel/abore any New Link Line operations already in progress.
+		for (int i = 1; i < 8; i++)
+		{
+			XferObject.NewLinkLineParameters[i] = 0;
+		}
+		XferObject.NewLinkPathFigure.StartPoint = new Point(0,0);
+		XferObject.NewLinkBezierSegment.Point1 = new Point(0,0);
+		XferObject.NewLinkBezierSegment.Point2 = new Point(0,0);
+		XferObject.NewLinkBezierSegment.Point3 = new Point(0,0);
+		
+		Element? mouseSenderElement = sender as Element;
 
-		Point? mousePanelOffset = e.GetPosition((sender as Element)?.Parent);
-
+		//Point? mousePanelOffset = e.GetPosition((sender as Element)?.Parent);
+		Point? mousePanelOffset = e.GetPosition(mouseSenderElement.Parent);
+		
 		//e.Data.Text = bpModelKey;
 		e.Data.Text = bpModelKey+","+dragItemContext+","+mousePanelOffset.Value.X+","+mousePanelOffset.Value.Y;
+		if (dragItemContext == "LinkNodeStart" || dragItemContext == "AnchorNodeStart")
+		{
+			e.Cancel = true;
+			Console.WriteLine("Node Dragged: mousePanelOffset = "+mousePanelOffset);
+			double xCorrection = 8-mousePanelOffset.Value.X; //correct for the mouse pointer location offset vs the node anchor point X
+			double yCorrection = 8-mousePanelOffset.Value.Y; //correct for the mouse pointer location offset vs the node anchor point Y
+			Console.WriteLine("Node Dragged: MathCheck = "+xCorrection+", "+yCorrection);
+			Point nodeOffsetPoint = GetRelativePositionToTreeLayout(mouseSenderElement, e);
+			e.Data.Properties.Add("Position",nodeOffsetPoint);
+			Links.initTestBezierCurve(sender, e);
+			//newLinkStartPoint = new Point(relativeToContainerPosition.Value.X,relativeToContainerPosition.Value.Y);
+			//newLinkStartPoint = new Point(nodeOffsetPoint.Value.X, nodeOffsetPoint.Value.Y);
+			XferObject.NewLinkPathFigure.StartPoint = nodeOffsetPoint;
+			XferObject.NewLinkBezierSegment.Point1 = new Point(nodeOffsetPoint.X+50, nodeOffsetPoint.Y);
+			XferObject.NewLinkLineParameters[0] = (dragItemContext == "LinkNodeStart")? 1 : 2;  //perhapse 0,1,2 -> 0 = do nothing, 1 = lnk node sender, 2 = Anchor node sender
+			XferObject.NewLinkLineParameters[1] = nodeOffsetPoint.X+xCorrection;
+			XferObject.NewLinkLineParameters[2] = nodeOffsetPoint.Y+yCorrection;
+			XferObject.NewLinkLineParameters[3] = (dragItemContext == "LinkNodeStart")? nodeOffsetPoint.X+50+xCorrection : nodeOffsetPoint.X-50+xCorrection;   //If the sender is a LinkNode, go right, if an Anchor, bezier goes left
+			XferObject.NewLinkLineParameters[4] = nodeOffsetPoint.Y+yCorrection;
+			//newLinkDragToggle = true;
+			//newLinkBezierSegment.Point2 = new Point(100, 0);
+			//newLinkBezierSegment.Point3 = new Point(150, 50);
+		} else 
+		{
+
+		}
+	}
+
+	private static Point GetRelativePositionToTreeLayout(Element SendingNode, DragStartingEventArgs e)
+	{
+		Point? offsetPoint = new Point(0,0);
+		Element? currentElement = SendingNode;
+		while (currentElement != null && currentElement is not ScrollView)
+		{
+			offsetPoint = e.GetPosition(currentElement);
+			currentElement = currentElement.Parent as Element;
+		}
+		return new Point(offsetPoint.Value.X,offsetPoint.Value.Y);
 	}
 
 	public static void OnDragOver(object? sender, DragEventArgs e)
@@ -128,6 +250,8 @@ public partial class TreePage : ContentPage
 			dragUI.IsCaptionVisible = false;
 			dragUI.IsGlyphVisible = false;
 		#endif
+
+
 	}
 
 	public static void OnMouseClick_TreeView(object sender, TappedEventArgs e)
@@ -263,6 +387,7 @@ public partial class TreePage : ContentPage
 			//(PanelBpName, newGenPanel) = GenerateNewBpTemplatePanelFromListModel(bpModelKey); //Generate Panel Object, this is backwards... Should Add/populate FlatFileData 1st, then generate VM, THEN VMMV
 			//(newGenPanel, panelHeight, panelWidth) = GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName);
 			TreeBuilder.SeedTreePanelDictionary(XferObjectFBPTree, PanelBpUniqueName, "Seed");
+			//TreeBuilder genPanelObject = new TreeBuilder();
 			(newGenPanel, visualGenPanel, panelHeight, panelWidth, sideBarItems) = TreeBuilder.GenerateNewBpTemplatePanelFromListModel(PanelBpUniqueName, XferObjectFBPTree);
 			
 			XferObjectFBPTree.BpTreeVM["Panels"][PanelBpUniqueName].Add("rect", new Rect(dropPosition.Value.X,dropPosition.Value.Y,panelWidth+16,panelHeight));
