@@ -14,21 +14,22 @@ To address these issues I'm working tpward the following:
 I'm using BubblePrints/Blueprint Explorer to access the Wrath Blueprint json: https://github.com/factubsio/BubblePrints
   Settings: Export Mode for 'Open in Editor' = 'JBP'
   Bubbleprints produces 99% valid wrath .jbp files, in the 1st entry, "AssedId", the guid has an erronius preceeding $ and there's a missing comma at the end of that line.  These errors have been accounted for in the current version of this code base.
-
-Dev status:
-This is currently pre-alpha, and not-useable
-Read and parse Json: yes
-Redeploy Json to visual layout: partial
-Reposition json panels in layout: yes
-generate drag list from library: yes
-drag/drop new panels: yes
-sort/filter list: no
-Link panel relationships: partial/no
-display side panel for data editing: partial
-Allow data editing: no
-Allow saving: no
-Track file open/new/modified/saved purity: partial
-Undo: no
-Testing Library: yes (Limited)
-Modify Library: no
-Save Library: no
+<br>
+ ## $\textcolor{red}{Status:\ Pre-alpha,\ NOT\ useable}$
+<table>
+<tr><td>Read and parse Json:</td><td>yes</td></tr>
+<tr><td>Redeploy Json to visual layout:</td><td>partial</td></tr>
+<tr><td>Reposition json panels in layout:</td><td>yes</td></tr>
+<tr><td>Generate drag list from library:</td><td>yes</td></tr>
+<tr><td>Drag/drop new panels:</td><td>yes/partial</td></tr>
+<tr><td>Sort/filter list:</td><td>no</td></tr>
+<tr><td>Link panel relationships:</td><td>partial/no</td></tr>
+<tr><td>Display side panel for data editing:</td><td>partial</td></tr>
+<tr><td>Allow data editing:</td><td>no</td></tr>
+<tr><td>Allow saving:</td><td>no</td></tr>
+<tr><td>Track file open/new/modified/saved purity:</td><td>partial</td></tr>
+<tr><td>Undo:</td><td>no</td></tr>
+<tr><td>Testing Library:</td><td>yes (Limited)</td></tr>
+<tr><td>Modify Library:</td><td>no</td></tr>
+<tr><td>Save Library:</td><td>no</td></tr>
+</table>
