@@ -17,3 +17,18 @@ I'm using BubblePrints/Blueprint Explorer to access the Wrath Blueprint json: ht
 
 Dev status:
 This is currently pre-alpha, and not-useable
+Read and parse Json: yes
+Redeploy Json to visual layout: partial
+Reposition json panels in layout: yes
+generate drag list from library: yes
+drag/drop new panels: yes
+sort/filter list: no
+Link panel relationships: partial/no
+display side panel for data editing: partial
+Allow data editing: no
+Allow saving: no
+Track file open/new/modified/saved purity: partial
+Undo: no
+Testing Library: yes (Limited)
+Modify Library: no
+Save Library: no
