@@ -11,5 +11,9 @@ To address these issues I'm working tpward the following:
 3. The GUi will use the popular wire-tree interconnect interface that has become the standard for multiple 3D and video effects applications for clearly showing the relationship complicated interactions and dependencies at a glance.
 4. Initially this will be a drag/drop interface with copy paste options. Once that is working with all of the above, I'm considering a multi-copy/drop option where tou hold a controlling key while dragging and the conditions of the drop may allow multiple copies to replicate and auto associate
 
+I'm using BubblePrints/Blueprint Explorer to access the Wrath Blueprint json: https://github.com/factubsio/BubblePrints
+  Settings: Export Mode for 'Open in Editor' = 'JBP'
+  Bubbleprints produces 99% valid wrath .jbp files, in the 1st entry, "AssedId", the guid has an erronius preceeding $ and there's a missing comma at the end of that line.  These errors have been accounted for in the current version of this code base.
+
 Dev status:
 This is currently pre-alpha, and not-useable
