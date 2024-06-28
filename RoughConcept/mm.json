@@ -1,0 +1,401 @@
+{
+"AssetId": "$4ac47ddb9fa1eaf43a1b6809980cfbd2"
+"Data":
+{
+  "$type": "da11db195c86e0d4dae17a2c03a4ba9a, BlueprintAbility",
+  "PrototypeLink": "",
+  "m_Overrides": [
+    "$SpellComponent$4ab9e8bb-eee5-4a13-9d60-b12917d32d2a",
+    "$SpellListComponent$1ed20f4f-08bc-4f59-9929-32ce8654d643",
+    "$AbilityEffectRunAction$faa60e46-e266-49d5-858d-dfdd9b0f9600",
+    "$AbilityDeliverProjectile$31df90f9-d203-4321-bc01-d9520e73fd74",
+    "$AbilityRankConfig$a9b4a114-7b43-484c-9606-75874342f601",
+    "$SpellListComponent$2ce04299-e336-4e13-ae52-a987d834f998",
+    "$RecommendationNoFeatFromGroup$ee4e7765-c320-4e13-a269-c9141c9fa659",
+    "$CraftInfoComponent$8eb50f48-be5e-418f-bcbd-59b3e47cc637"
+  ],
+  "Components": [
+    {
+      "$type": "bbf7e743804d40a47bde0b27174f33a9, SpellComponent",
+      "m_Flags": 0,
+      "name": "$SpellComponent$4ab9e8bb-eee5-4a13-9d60-b12917d32d2a",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "School": "Evocation"
+    },
+    {
+      "$type": "317417736594fa843918ddbcfeb74a76, SpellListComponent",
+      "m_Flags": 0,
+      "name": "$SpellListComponent$1ed20f4f-08bc-4f59-9929-32ce8654d643",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_SpellList": "!bp_ba0401fdeb4062f40a7aa95b6f07fe89",
+      "SpellLevel": 1
+    },
+    {
+      "$type": "66e032e5cf38801428940a1a0d14b946, AbilityEffectRunAction",
+      "m_Flags": 0,
+      "name": "$AbilityEffectRunAction$faa60e46-e266-49d5-858d-dfdd9b0f9600",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "SavingThrowType": "Unknown",
+      "Actions": {
+        "Actions": [
+          {
+            "$type": "bdc93cbacbdc05843a933659f15c1302, ContextActionDealDamage",
+            "name": "$AbilityActionDealDamage$b226d951-ba36-4168-abf9-b73660a99156",
+            "m_Type": "Damage",
+            "DamageType": {
+              "Type": "Force",
+              "Common": {
+                "Reality": 0,
+                "Alignment": 0,
+                "Precision": false
+              },
+              "Physical": {
+                "Material": 0,
+                "Form": 0,
+                "Enhancement": 0,
+                "EnhancementTotal": 0
+              },
+              "Energy": "Fire"
+            },
+            "Drain": false,
+            "AbilityType": "Unknown",
+            "EnergyDrainType": "Temporary",
+            "Duration": {
+              "Rate": "Rounds",
+              "DiceType": "Zero",
+              "DiceCountValue": {
+                "ValueType": "Simple",
+                "Value": 0,
+                "ValueRank": "Default",
+                "ValueShared": "Damage",
+                "Property": "None",
+                "m_CustomProperty": null,
+                "m_AbilityParameter": "Level",
+                "PropertyName": "Value1"
+              },
+              "BonusValue": {
+                "ValueType": "Simple",
+                "Value": 0,
+                "ValueRank": "Default",
+                "ValueShared": "Damage",
+                "Property": "None",
+                "m_CustomProperty": null,
+                "m_AbilityParameter": "Level",
+                "PropertyName": "Value1"
+              },
+              "m_IsExtendable": true
+            },
+            "ReadPreRolledFromSharedValue": false,
+            "PreRolledSharedValue": "Damage",
+            "Value": {
+              "DiceType": "D4",
+              "DiceCountValue": {
+                "ValueType": "Simple",
+                "Value": 1,
+                "ValueRank": "Default",
+                "ValueShared": "Damage",
+                "Property": "None",
+                "m_CustomProperty": null,
+                "m_AbilityParameter": "Level",
+                "PropertyName": "Value1"
+              },
+              "BonusValue": {
+                "ValueType": "Simple",
+                "Value": 1,
+                "ValueRank": "Default",
+                "ValueShared": "Damage",
+                "Property": "None",
+                "m_CustomProperty": null,
+                "m_AbilityParameter": "Level",
+                "PropertyName": "Value1"
+              }
+            },
+            "Half": false,
+            "DisableSneakDamage": false,
+            "AlreadyHalved": false,
+            "IsAoE": false,
+            "HalfIfSaved": false,
+            "IgnoreCritical": false,
+            "IgnoreUnitModifiers": false,
+            "AddAdditionalDamage": false,
+            "AddFavoredEnemyDamage": false,
+            "UseWeaponDamageModifiers": false,
+            "UseMinHPAfterDamage": false,
+            "MinHPAfterDamage": 0,
+            "WriteResultToSharedValue": false,
+            "WriteRawResultToSharedValue": false,
+            "ResultSharedValue": "Damage",
+            "WriteCriticalToSharedValue": false,
+            "CriticalSharedValue": "Damage",
+            "SetFactAsReason": false
+          }
+        ]
+      }
+    },
+    {
+      "$type": "a7ec15576fb827040bfe609a904482cd, AbilityDeliverProjectile",
+      "m_Flags": 0,
+      "name": "$AbilityDeliverProjectile$31df90f9-d203-4321-bc01-d9520e73fd74",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_Projectiles": [
+        "!bp_2e3992d1695960347a7f9bdf8122966f",
+        "!bp_741743ccd287a854fbb68ce70f75fa05",
+        "!bp_674e6d958be63ff4a85a7e5fdc1e818a",
+        "!bp_caadaf27d789793459a3e32cb0615d14",
+        "!bp_43295b5988021f741a28b8bf0424a412"
+      ],
+      "Type": "Simple",
+      "UseCastPositionInsteadCasterPosition": false,
+      "IsHandOfTheApprentice": false,
+      "m_Length": {
+        "m_Value": 0.0
+      },
+      "m_LineWidth": {
+        "m_Value": 5.0
+      },
+      "NeedAttackRoll": false,
+      "m_Weapon": null,
+      "ReplaceAttackRollBonusStat": false,
+      "AttackRollBonusStat": "Unknown",
+      "UseMaxProjectilesCount": true,
+      "MaxProjectilesCountRank": "Default",
+      "DelayBetweenProjectiles": 0.0,
+      "m_ControlledProjectileHolderBuff": null
+    },
+    {
+      "$type": "a15673bd9e3879442825226335fd8fe2, ContextRankConfig",
+      "m_Flags": 0,
+      "name": "$AbilityRankConfig$a9b4a114-7b43-484c-9606-75874342f601",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_Type": "Default",
+      "m_BaseValueType": "CasterLevel",
+      "useArmorBaseAc": false,
+      "useArmorBonusAc": false,
+      "useArmorFocusAc": false,
+      "userShieldBaseAc": false,
+      "useShieldBonusAc": false,
+      "useShieldFocusAc": false,
+      "m_Feature": null,
+      "m_FeatureList": [],
+      "m_Stat": "Unknown",
+      "m_SpecificModifier": "None",
+      "m_Buff": null,
+      "m_BuffRankMultiplier": 1,
+      "m_Progression": "OnePlusDiv2",
+      "m_CustomProgression": [],
+      "m_StartLevel": 0,
+      "m_StepLevel": 0,
+      "m_UseMin": false,
+      "m_Min": 0,
+      "m_UseMax": true,
+      "m_Max": 5,
+      "m_ExceptClasses": false,
+      "Archetype": null,
+      "m_AdditionalArchetypes": [],
+      "m_Class": [],
+      "m_CustomProperty": null,
+      "m_CustomPropertyList": [],
+      "m_DisableRankBonus": false
+    },
+    {
+      "$type": "317417736594fa843918ddbcfeb74a76, SpellListComponent",
+      "m_Flags": 0,
+      "name": "$SpellListComponent$229ceb44-f6fc-498b-a5e8-329801c64cea",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_SpellList": "!bp_4d72e1e7bd6bc4f4caaea7aa43a14639",
+      "SpellLevel": 1
+    },
+    {
+      "$type": "4b6c2ac95f357d845ae3a30d6fc6641a, RecommendationNoFeatFromGroup",
+      "m_Flags": 0,
+      "name": "$RecommendationNoFeatFromGroup$1c420b20-00c2-4663-bbab-68a604463913",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_Features": [
+        "!bp_4d491cf9631f7e9429444f4aed629791"
+      ],
+      "m_FeaturesExlude": [
+        "!bp_30493b3bd627435aa6b1cf3011dc762c"
+      ],
+      "GoodIfNoFeature": false
+    },
+    {
+      "$type": "317417736594fa843918ddbcfeb74a76, SpellListComponent",
+      "m_Flags": 0,
+      "name": "$SpellListComponent$2ce04299-e336-4e13-ae52-a987d834f998",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_SpellList": "!bp_98c05aeff6e3d384f8aec6d584973642",
+      "SpellLevel": 1
+    },
+    {
+      "$type": "4b6c2ac95f357d845ae3a30d6fc6641a, RecommendationNoFeatFromGroup",
+      "m_Flags": 0,
+      "name": "$RecommendationNoFeatFromGroup$ee4e7765-c320-4e13-a269-c9141c9fa659",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "m_Features": [
+        "!bp_aeff0a749e20ffe4b9e2846eae29c386"
+      ],
+      "m_FeaturesExlude": [],
+      "GoodIfNoFeature": false
+    },
+    {
+      "$type": "faae7c00f379e66488a537d47a2919ad, CraftInfoComponent",
+      "m_Flags": 0,
+      "name": "$CraftInfoComponent$8eb50f48-be5e-418f-bcbd-59b3e47cc637",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "SpellType": "Damage",
+      "SavingThrow": "None",
+      "AOEType": "None"
+    },
+    {
+      "$type": "91216784d99a12e428bf782c8a8c7f5c, SpellDescriptorComponent",
+      "m_Flags": 0,
+      "name": "$SpellDescriptorComponent$9e262cfc-0995-4372-bb80-3dd81b6d8d18",
+      "PrototypeLink": {
+        "guid": "",
+        "name": ""
+      },
+      "m_Overrides": [],
+      "Descriptor": {
+        "m_IntValue": 34359738368
+      }
+    }
+  ],
+  "Comment": "",
+  "m_AllowNonContextActions": false,
+  "m_DisplayName": {
+    "m_Key": "b576364f-f55a-4272-83ed-2d9ee8d51777",
+    "m_OwnerString": "4ac47ddb9fa1eaf43a1b6809980cfbd2",
+    "m_OwnerPropertyPath": "m_DisplayName",
+    "m_JsonPath": "Strings/Mechanics/Blueprints/Spells/Level1/MagicMissile_m_DisplayName.json",
+    "Shared": null
+  },
+  "m_Description": {
+    "m_Key": "9262fe33-f425-4d4f-b9d8-4544e29138ba",
+    "m_OwnerString": "4ac47ddb9fa1eaf43a1b6809980cfbd2",
+    "m_OwnerPropertyPath": "m_Description",
+    "m_JsonPath": "Strings/Mechanics/Blueprints/Spells/Level1/MagicMissile_m_Description.json",
+    "Shared": null
+  },
+  "m_DescriptionShort": {
+    "m_Key": "",
+    "m_OwnerString": "",
+    "m_OwnerPropertyPath": "",
+    "m_JsonPath": "",
+    "Shared": null
+  },
+  "m_Icon": {
+    "guid": "27854775588ed38478599af5cbb73556",
+    "fileid": 21300000
+  },
+  "m_DefaultAiAction": null,
+  "m_AutoUseIsForbidden": false,
+  "Type": "Spell",
+  "Range": "Medium",
+  "IgnoreMinimalRangeLimit": false,
+  "CustomRange": {
+    "m_Value": 0.0
+  },
+  "ShowNameForVariant": false,
+  "OnlyForAllyCaster": false,
+  "CanTargetPoint": false,
+  "CanTargetEnemies": true,
+  "CanTargetFriends": false,
+  "CanTargetSelf": true,
+  "ShouldTurnToTarget": true,
+  "SpellResistance": true,
+  "IgnoreSpellResistanceForAlly": false,
+  "ActionBarAutoFillIgnored": false,
+  "Hidden": false,
+  "NeedEquipWeapons": false,
+  "UseCurrentWeaponAsReasonItem": false,
+  "NotOffensive": false,
+  "EffectOnAlly": "None",
+  "EffectOnEnemy": "Harmful",
+  "m_Parent": null,
+  "Animation": "Directional",
+  "HasFastAnimation": false,
+  "AnimationStyle": "CastActionDirectional",
+  "m_TargetMapObjects": false,
+  "ActionType": "Standard",
+  "MinimalTransitionOut": 0.0,
+  "AvailableMetamagic": "Empower, Maximize, Quicken, Heighten, Reach, CompletelyNormal, Bolstered",
+  "m_IsFullRoundAction": false,
+  "LocalizedDuration": {
+    "m_Key": "",
+    "m_OwnerString": "",
+    "m_OwnerPropertyPath": "",
+    "m_JsonPath": "",
+    "Shared": null
+  },
+  "LocalizedSavingThrow": {
+    "m_Key": "",
+    "m_OwnerString": "",
+    "m_OwnerPropertyPath": "",
+    "m_JsonPath": "",
+    "Shared": null
+  },
+  "MaterialComponent": {
+    "m_Item": null,
+    "Count": 1
+  },
+  "DisableLog": false,
+  "ResourceAssetIds": [
+    "1a95662ab9857804380e2eee33b3ea26",
+    "19ea234d7a2a1254b86af64f9acc3be5",
+    "84de679628897e24f844cecbb52075de",
+    "4b73347c5ed296b48949c4a2918f7466",
+    "1a95662ab9857804380e2eee33b3ea26",
+    "84de679628897e24f844cecbb52075de",
+    "4b73347c5ed296b48949c4a2918f7466",
+    "1a95662ab9857804380e2eee33b3ea26",
+    "84de679628897e24f844cecbb52075de",
+    "4b73347c5ed296b48949c4a2918f7466",
+    "1a95662ab9857804380e2eee33b3ea26",
+    "84de679628897e24f844cecbb52075de",
+    "4b73347c5ed296b48949c4a2918f7466",
+    "1a95662ab9857804380e2eee33b3ea26",
+    "84de679628897e24f844cecbb52075de",
+    "4b73347c5ed296b48949c4a2918f7466"
+  ]
+}
+}

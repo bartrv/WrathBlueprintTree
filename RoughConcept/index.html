@@ -1,0 +1,16 @@
+<doctype text/html>
+<html>
+<head>
+<script src="asAClass.js"></script>
+<script>
+var wotrBlueprint = {};
+</script>
+</head>
+<body>
+Paste json here...<br />
+<textarea name="jsonInput" id="jsonInput" rows="15" cols="128" spellcheck="false"></textarea><br />
+<input type="button" value="Parse json" onclick="wotrBlueprint = goParseJson(document.getElementById('jsonInput'))" />
+<hr>
+<div id="output" style="height:200px; background-color:#FAFAFA;"></div>
+</body>
+</html>

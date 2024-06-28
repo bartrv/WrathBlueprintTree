@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-US" data-ntp-features="tracker-stats-widget:off">
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8;charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1" />
+<meta name="HandheldFriendly" content="false"/>
+<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" href="wigits.css">
+<style>
+
+</style>
+
+<script src="dragDrop.js"></script>
+<script>
+const panelList = {};
+				//{panelId:{"panelNode":panelObject, "panelJsonId":panelBpUUID, "x":px, "y":px, "linkId":[{"uuid:":linkUID1,"localNode":node_id,"targetBp":connectedPanelBPuuid},...]},...};
+const linkList= {};
+			  //{"linkId":{"start":{"panel":"panelID","node":"nodeID","offset":{"x":px,"y":px}},"end":{"panel":"panelID","node":"nodeID","offset":{"x":px,"y":px}},"controlPoint":{"p1":[x,y],"p2":[x,y],"p3":[x,y],"p4":[x,y]}},{}...};
+			//Looping through -> onmousemove if (polyline([n.controlPoint.p1,n.controlPoint.p2,n.controlPoint.p3,n.controlPoint.p4)  then trigger highlight...
+			//	or, on moveFrame, linkList[frameNode.linkID[n]].controlPoint.p1/p2/p3/p4 --> new Frame[x,y] coordinate(s) + linkList[frameNode.linkID[n]].start.offset.x/y - .end.offset.x/y
+//ToDo - finish line generation  - onclick?drag? nodes, listener mouse drag/down? if mouseup on receipt nodes gen-line - rubberband-> canvas.save() - reload() - draw, reload() - draw,...
+//       Also, complete redraw for each new line, remember to add to link list regardles
+
+//TODO - Remove panel/Frame - and update links upon Remove
+// ToDo - recalculate size of DnD/link canvases on window resize.
+
+function allowDrop(ev) {
+	ev.preventDefault();
+}
+
+function drag(ev, repo=0, bpGUID=0) {
+	ev.dataTransfer.clearData();
+	let divLocX = ev.layerX;
+	let divLocY = ev.layerY;
+	console.log("divLocX, divLocY: "+divLocX+", "+divLocY);
+	//ev.dataTransfer.setData("Text", ev.currentTarget.id+","+repo+","+divLocX+","+divLocY+","+bpGUID);
+	ev.dataTransfer.setData("Text", ev.target.id+","+repo+","+divLocX+","+divLocY+","+bpGUID);
+}
+
+function buildPanelContent(evData){
+	if (evData != null){
+		//let dataNode = document.createTextNode(evData);
+		let tempSpan = document.createElement("span"); 
+		//tempSpan.setAttribute("class","unselectable");
+		tempSpan.setAttribute("style","text-align:center");
+		//tempSpan.appendChild(dataNode);
+		tempSpan.innerHTML = "<br />-----<br />"+evData+"<br />-----";
+		return tempSpan;
+	}
+	return false;
+}
+
+function newDropItem(newFrame, evData){
+
+	let dataNode = buildPanelContent(evData); // ToDo dataNode will be a return from a function that builds a panel layout based on the BP template type selected, evData will have the template designator
+	//let tempSpan = document.createElement("span"); 
+	//tempSpan.setAttribute("style","unselectable");
+	//let tempSpan = document.appendChild(dataNode); // ToDo dataNode will be a return from a function that builds a panel layout based on the BP template type selected, evData will have the template designator
+	
+	newFrame = document.createElement("div"); //newFrame is an invisible container to hold other elements of the panel
+	//newFrame.id = "FF_"+evData+"_"+ panelList.length;
+	newFrame.id = "FF_"+evData+Object.keys(panelList).length;
+	//console.log("new Frame: "+newFrame.id);
+	newFrame.style.width = "120px";
+	newFrame.style.height = "180px";
+	newFrame.style.position = "absolute";
+	newFrame.setAttribute("draggable","false");
+	//newFrame.setAttribute("ondragstart","drag(event,'this_exists')");
+	
+	inFrame = document.createElement("div"); //inFrame is the primary visible frame to display interface
+	//inFrame.id = "FF_"+evData+"_inFrame";
+	inFrame.id = newFrame.id+"_inFrame"
+	inFrame.style.width = "100px";
+	inFrame.style.height = "178px";
+	inFrame.style.left = "8px";
+	//inFrame.style.top = "1px";
+	inFrame.style.border = "2px solid #000";
+	inFrame.style.borderRadius = "5px";
+	inFrame.style.backgroundColor = "#BBB";
+	inFrame.style.position = "absolute";
+	inFrame.setAttribute("draggable","false");
+	inFrame.appendChild(dataNode);
+	
+	frameHandle = document.createElement("div"); //frameHandle is the draggable object for repositioning inFrame and its children 
+	//frameHandle.id = "FF_"+evData+"_"+Object.keys(panelList).length+"_handle";
+	frameHandle.id = newFrame.id+"_handle";
+	frameHandle.style.width = "50px";
+	frameHandle.style.height = "8px";
+	frameHandle.style.left = "6px";
+	frameHandle.style.top = "-3px";
+	frameHandle.style.border = "1px solid #000";
+	frameHandle.style.borderRadius = "2px";
+	frameHandle.style.backgroundColor = "#999";
+	frameHandle.setAttribute("draggable","true");
+	frameHandle.style.position = "absolute";
+	
+	frameHandle.setAttribute("ondragstart","drag(event,1,'this_exists')");	//frameHandle.setAttribute("onmouseleave","document.getElementById('"+newFrame.id+"').setAttribute('draggable','false');document.getElementById('"+newFrame.id+"').setAttribute(\"ondragstart\",\"\");");
+	
+	function makeDot(newDot, evData, dotLeft, dotTop, dotID, dotIO){ //makeDot generates wire connection targets, ie. drag/drop dots/targets
+		//newDot.id = "FF_"+evData+dotID;
+		newDot.id = newFrame.id+"_"+dotID;
+		newDot.style.width = "16px";
+		newDot.style.height = "16px";
+		newDot.style.left = dotLeft+"px";
+		newDot.style.top = dotTop+"px";
+		newDot.style.border = "1px solid #999";
+		newDot.style.borderRadius = "8px";
+		newDot.style.backgroundColor = "#E4E4E4";
+		newDot.style.position = "absolute";
+		newDot.setAttribute("draggable","false");
+		if (dotIO == "linkFrom") {
+			newDot.setAttribute("onmouseup","pickLineEnd(event);");
+		} else if (dotIO == "linkTo"){
+			//newDot.setAttribute("onmouseup","pickLineStart(event);");
+			newDot.setAttribute("onmousedown","pickLineStart(event);");
+			//newDot.setAttribute("ondragleave","pickLineStart(event);");
+			//newDot.setAttribute("ondragexit","pickLineStart(event);");
+		}
+		return newDot;
+	}
+	let dotIn1 = document.createElement("div");
+	dotIn1 = makeDot(dotIn1,evData[0],-2,20,"dotIn1","linkFrom");
+	let dotOutA = document.createElement("div");
+	dotOutA = makeDot(dotOutA,evData[0],102,35,"dotOutA","linkTo");
+	let dotOutB = document.createElement("div");
+	dotOutB = makeDot(dotOutB,evData,102,70,"dotOutB","linkTo");
+	
+	newFrame.appendChild(inFrame);
+	newFrame.appendChild(dotIn1);
+	newFrame.appendChild(dotOutA);
+	newFrame.appendChild(dotOutB);
+	newFrame.appendChild(frameHandle);
+	return newFrame;
+	
+}
+
+function drop(ev){ //check reposition flag and call appropriate drop routine(s)
+	console.log(ev.dataTransfer.getData("Text"));
+	let dropType = parseInt(ev.dataTransfer.getData("Text").split(",")[1]);
+
+	if (dropType === 0) {
+		dropInsert(ev);
+	} else if (dropType === 1){
+		dropReposition(ev);
+	}
+}
+
+function dropInsert(ev) {
+	let evSerialData = ev.dataTransfer.getData("Text");
+	let evData = evSerialData.split(",");
+	console.log(evData[0]);
+	let newFrame = "";	
+	newFrame = newDropItem(newFrame, evData[0]);
+	console.log(newFrame.id);
+	newFrame.style.zIndex = "100"; //new inserted frame should have the same z-index as parent/drop target
+	newFrame.style.left = (ev.layerX)+"px";
+	newFrame.style.top = (ev.layerY)+"px";
+	
+	//console.log("X, Y : "+ev.layerX+", "+ev.layerY);
+	//ev.target.appendChild(newFrame);
+	document.getElementById("backFrame").appendChild(newFrame);
+	//panelList.push(newFrame.id); //add new panel ID to the list of existing panels in the drop zone
+	panelList[newFrame.id] = {"panelNode":newFrame, "panelJsonId":evData[4], "x":ev.layerX, "y":ev.layerY, "linkId":[]}; //add new panel object and node to the list of existing panels in the drop zone
+	//panelList reference format ==> {panelId:{"panelNode":panelObject, "panelJsonId":panelBpUUID, "linkId":[{"uuid:":linkUUID,"localNode":node_id,"targetBp":connectedPanelBPuuid},...]},...};
+	ev.preventDefault();
+}
+
+function dropReposition(ev) {
+	let evSerialData = ev.dataTransfer.getData("Text");
+	let evData = evSerialData.split(",");
+	console.log("id, repo, : "+evData);
+	let movingFrame = document.getElementById(evData[0]).parentNode;
+	let scrollX = document.getElementById("backFrame").scrollLeft;
+	let scrollY = document.getElementById("backFrame").scrollTop;
+
+	//movingFrame.style.left = (ev.layerX-evData[2]+scrollX-6)+"px";
+	//movingFrame.style.top = (ev.layerY-evData[3]+scrollY+3)+"px";
+	
+	panelList[movingFrame.id].x = (ev.layerX-evData[2]-3);
+	panelList[movingFrame.id].y = (ev.layerY-evData[3]-3);
+	//movingFrame.style.left = (ev.layerX-evData[2]-3)+"px";
+	//movingFrame.style.top = (ev.layerY-evData[3]+3)+"px";
+	movingFrame.style.left = panelList[movingFrame.id].x+"px";
+	movingFrame.style.top = panelList[movingFrame.id].y+"px";
+	
+	console.log("X, Y : "+ev.layerX+", "+ev.layerY);
+	//console.log("X-data, Y-data : "+ev.layerX-evData[2]+1+", "+ev.layerY-evData[3]+3);
+	let newDivHeight = document.getElementById('backFrame').scrollHeight;
+	let newDivWidth = document.getElementById('backFrame').scrollWidth;
+	doLog("backFrame scrollHeight: "+ newDivHeight);
+	doLog("backFrame scrollWidth: "+ newDivWidth,1);
+	resizeLinkCanvas('highlightBoard', newDivWidth-4, newDivHeight-4)
+	resizeLinkCanvas('linkBoard', newDivWidth-3, newDivHeight-3)
+	
+	//update link line end points
+	for (const linkEntry of panelList[movingFrame.id].linkId){
+		//let ioNode = linkEntry.localNode.split("_")[2][3]; // "FF_itemA0_dotInAB" -> ["FF","itemA0","dotInAB"] -> "I"
+		//if (iNode == "I"){
+		//		linkList[linkEntry.uuid].controlPoint.p1 = [panelList[movingFrame.id].x + ,panelList[movingFrame.id].y + ];
+		//}
+		linkList[linkEntry.uuid].controlPoint.p1 = [panelList[linkList[linkEntry.uuid].start.panel].x + linkList[linkEntry.uuid].start.offset.x, panelList[linkList[linkEntry.uuid].start.panel].y + linkList[linkEntry.uuid].start.offset.y];
+		linkList[linkEntry.uuid].controlPoint.p4 = [panelList[linkList[linkEntry.uuid].end.panel].x + linkList[linkEntry.uuid].end.offset.x, panelList[linkList[linkEntry.uuid].end.panel].y + linkList[linkEntry.uuid].end.offset.y];
+		
+		let cpXDistance = (linkList[linkEntry.uuid].controlPoint.p4[0] < linkList[linkEntry.uuid].controlPoint.p1[0]) ? 150 : 75; // if the end point is left of the start point, the magnitude of the control points should be larger
+		linkList[linkEntry.uuid].controlPoint.p2[0] = linkList[linkEntry.uuid].controlPoint.p1[0] + cpXDistance; 
+		linkList[linkEntry.uuid].controlPoint.p2[1] = linkList[linkEntry.uuid].controlPoint.p1[1];
+		linkList[linkEntry.uuid].controlPoint.p3[0] = linkList[linkEntry.uuid].controlPoint.p4[0] - cpXDistance;
+		linkList[linkEntry.uuid].controlPoint.p3[1] = linkList[linkEntry.uuid].controlPoint.p4[1];
+	}
+	//regenerate link lines
+	drawLinkLines("refresh");
+	ev.preventDefault();
+}
+
+var testRollList=[];
+function genCanvasLine(startLink, endLink, lineLinkId = null){
+	if (lineLinkId == null ){
+		//let pointSx, pointSy, cp1X, cp1Y, cp2X, cp2Y, pointEx, pointEy = 0;
+		//[pointSx,pointSy] = startLink;
+		//[pointEx,pointEy] = endLink;
+		for (const [key, linkLineEntry] of Object.entries(linkList)){
+			if (linkLineEntry.start.panel == newLineTemp.start.panel % linkLineEntry.end.panel == newLineTemp.end.panel){
+				newLineTemp = {"start":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"end":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"controlPoint":{"p1":[0,0],"p2":[0,0],"p3":[0,0],"p4":[0,0]}};
+				doLog("Linkage already exists!");
+				return false;
+			}
+		}
+		let {"p1":[pointSx, pointSy], "p2":[cp1X, cp1Y], "p3":[cp2X, cp2Y], "p4":[pointEx, pointEy]} = newLineTemp.controlPoint;
+		
+		cp1X = pointSx+((pointEx < pointSx) ? 150 : 75); // if the end point is left of the start point, the magnitude of the control points should be larger
+		cp1Y = pointSy;
+		newLineTemp.controlPoint.p2 = [cp1X, cp1Y];
+		cp2X = pointEx-((pointEx < pointSx) ? 150 : 75);
+		cp2Y = pointEy;
+		newLineTemp.controlPoint.p3 = [cp2X, cp2Y];
+		//record new
+		lineLinkId = self.crypto.randomUUID();
+		linkList[lineLinkId] = newLineTemp; // add new line to linkLine list
+		//testRollList = [pointSx, pointSy, cp1X, cp1Y, cp2X, cp2Y, pointEx, pointEy];
+		let newLinkIdEntry = {"uuid":lineLinkId, "localNode":newLineTemp.start.node, "targetBp":panelList[newLineTemp.end.panel].panelJsonId};
+		panelList[newLineTemp.start.panel].linkId.push(newLinkIdEntry); // add new link enrty to outer/referencing Bp Panel
+		panelList[newLineTemp.end.panel].linkId.push(newLinkIdEntry); // add new link enrty to linked/referenced Bp Panel
+		//panelList reference format ==> {panelId:{"panelNode":panelObject, "panelJsonId":panelBpUUID, "linkId":[{"uuid:":linkUID1,"localNode":node_id,"targetBp":connectedPanelBPuuid},...]},...};
+	} else {
+		let {"p1":[pointSx, pointSy], "p2":[cp1X, cp1Y], "p3":[cp2X, cp2Y], "p4":[pointEx, pointEy]} = linkList[lineLinkId].controlPoint;
+	}
+	newLineTemp = {"start":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"end":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"controlPoint":{"p1":[0,0],"p2":[0,0],"p3":[0,0],"p4":[0,0]}};
+	drawLinkLines();
+	return true;
+}
+
+function drawLinkLines(drawType = "new", linkLineId = null){
+	// drawType = "new", "refresh", "dragging"
+	let cvs = document.getElementById("linkBoard");
+	let ctx = cvs.getContext("2d");
+	ctx.clearRect(0,0,cvs.width,cvs.height);
+	for (const [key, linkLineEntry] of Object.entries(linkList)){
+		ctx.beginPath();		
+		//ctx.moveTo(testRollList[0], testRollList[1]);
+		//ctx.bezierCurveTo(testRollList[2], testRollList[3], testRollList[4],testRollList[5], testRollList[6], testRollList[7]);
+		let {"p1":[cp1X,cp1Y],"p2":[cp2X,cp2Y],"p3":[cp3X,cp3Y],"p4":[cp4X,cp4Y]} = linkLineEntry.controlPoint;
+		ctx.moveTo(cp1X, cp1Y);
+		ctx.bezierCurveTo(cp2X, cp2Y, cp3X, cp3Y, cp4X, cp4Y);
+		ctx.stroke();
+	}
+	return true;
+}
+
+//var lineStart = [0,0];
+//var lineEnd = [0,0];
+var newLineTemp = {"start":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"end":{"panel":null,"node":null,"offset":{"x":0,"y":0}},"controlPoint":{"p1":[0,0],"p2":[0,0],"p3":[0,0],"p4":[0,0]}};
+function pickLineStart(ev){
+	//lineStart = [ev.layerX+6,ev.layerY+6];
+	//lineStart = [ev.currentTarget.parentNode.offsetLeft+108,ev.currentTarget.parentNode.offsetTop];
+	let panelWidth = 100;
+	let nodeSize = 16;
+	newLineTemp.start.panel = ev.currentTarget.parentNode.id; //element id of the parent panel(div)
+	newLineTemp.start.node = ev.currentTarget.id //element id of the node(div)
+	newLineTemp.start.offset.x = panelWidth + nodeSize/2;
+	newLineTemp.start.offset.y = ev.currentTarget.offsetTop + nodeSize/2; //multiple node options, may reference numerous blueprints
+	newLineTemp.controlPoint.p1[0] = ev.currentTarget.parentNode.offsetLeft + newLineTemp.start.offset.x;
+	newLineTemp.controlPoint.p1[1] = ev.currentTarget.parentNode.offsetTop + newLineTemp.start.offset.y;
+	//lineStart[1] += ev.currentTarget.offsetTop+8;
+	//doLog("LineStart:"+ev.currentTarget.id+", x:"+lineStart[0]+", y:"+lineStart[1]);
+	
+	doLog("LineStart:"+ev.currentTarget.id+", x:"+newLineTemp.controlPoint.p1[0]+", y:"+newLineTemp.controlPoint.p1[1]);
+	ev.preventDefault();
+}
+
+function pickLineEnd(ev){
+	let panelConnectPointY = 20;
+	let nodeSize = 16;
+	//lineEnd = [ev.currentTarget.parentNode.offsetLeft+8,ev.currentTarget.parentNode.offsetTop+28];
+	newLineTemp.end.panel = ev.currentTarget.parentNode.id; //element id of the parent panel(div)
+	newLineTemp.end.node = ev.currentTarget.id //element id of the node(div)
+	newLineTemp.end.offset.x = nodeSize/2;
+	newLineTemp.end.offset.y = panelConnectPointY + nodeSize/2;
+	newLineTemp.controlPoint.p4[0] = ev.currentTarget.parentNode.offsetLeft + newLineTemp.end.offset.x;
+	newLineTemp.controlPoint.p4[1] = ev.currentTarget.parentNode.offsetTop + newLineTemp.end.offset.y;
+	//lineStart[0] = lineStart[0]+262;
+	//genCanvasLine(lineStart,lineEnd);
+	genCanvasLine(newLineTemp.controlPoint.p1,newLineTemp.controlPoint.p4);
+	//doLog("LineEnd:"+ev.currentTarget.id+", x:"+lineEnd[0]+", y:"+lineEnd[1]);
+	doLog("LineEnd:"+ev.currentTarget.id+", x:"+newLineTemp.controlPoint.p4[0]+", y:"+newLineTemp.controlPoint.p4[1],1);
+	//lineStart = [0,0];
+	//lineEnd = [0,0];
+	ev.preventDefault();
+}
+
+function cancelLineDraw(){
+
+}
+
+function mouseOverLineTest(ev){
+	//alert(ev.clientX);
+	const targetCanvas = document.getElementById("highlightBoard");
+    let myMouseX = ev.layerX - targetCanvas.offsetLeft;
+    let myMouseY = ev.layerY - targetCanvas.offsetTop;
+	//let myMouseX = document.getElementById('backFrame').layerX - targetCanvas.offsetLeft
+    //let myMouseY = document.getElementById('backFrame').layerY - targetCanvas.offsetTop
+	const ctxs = targetCanvas.getContext("2d");
+	ctxs.clearRect(0,0,targetCanvas.width,targetCanvas.height);
+	ctxs.beginPath();
+	ctxs.moveTo(testRollList[0], testRollList[1]);
+	ctxs.bezierCurveTo(testRollList[2],testRollList[3], testRollList[4],testRollList[5], testRollList[6],testRollList[7]);
+	ctxs.strokeStyle="cyan";
+	ctxs.lineWidth = 3;
+	
+    if (ctxs.isPointInStroke(myMouseX, myMouseY)) {
+ 		document.getElementById("dataTracking").innerHTML = "Yes!";
+		ctxs.stroke();
+	} else { 
+		document.getElementById("dataTracking").innerHTML = "Nope: "+myMouseX+", "+myMouseY;
+	}
+}
+function doLog(logString,doAppend=0){
+	let logWindow = document.getElementById('dataTracking');
+	let logHTML ="";
+	if (doAppend ===1){
+		logHTML = logWindow.innerHTML;
+	}
+	logHTML +="<br />"+logString;
+	logWindow.innerHTML = logHTML;
+	return;
+}
+
+function resizeLinkCanvas(cvsTarget, newWidth, newHeight){
+	//grab content
+	let canvasToResize = document.getElementById(cvsTarget);
+	let cvsCtx = canvasToResize.getContext('2d');
+	cvsCtx.save();
+	
+	cvsCtx.width = newWidth;
+	cvsCtx.height = newHeight;
+	canvasToResize.width = newWidth;
+	canvasToResize.height = newHeight;
+	//cvsCtx.restore();
+}
+
+function seedCanvas(){
+	resizeLinkCanvas("highlightBoard",document.getElementById('backFrame').scrollWidth-5,document.getElementById('backFrame').scrollHeight-5);
+	resizeLinkCanvas("linkBoard",document.getElementById('backFrame').scrollWidth-5,document.getElementById('backFrame').scrollHeight-5);
+}
+</script>
+</head>
+<body onload="seedCanvas()">
+<div id="appFrame">
+	<div id="dragFrame"> 
+		<div id="itemA" class="itemToDrag" draggable="true" ondragstart="drag(event,0,'data1678-1234-1234-1234-123456789012')">Item A desc.</div>
+		<div id="itemB" class="itemToDrag" draggable="true" ondragstart="drag(event,0,'data2678-2234-2234-2234-223456789012')">Item B desc.</div>
+		<div id="itemC" class="itemToDrag" draggable="true" ondragstart="drag(event,0,'data3678-3234-3234-3234-323456789012')">Item C desc.</div>
+	</div>
+	<!--<div id="dropFrame" ondrop="drop(event)" ondragover="allowDrop(event)">
+	</div>-->
+	<div id="backFrame">
+		<canvas id="linkBoard">Canvas init error, incompatible browser.</canvas>
+		<canvas id="highlightBoard" onmousemove="mouseOverLineTest(event,this)" ondrop="drop(event)" ondragover="allowDrop(event)">Canvas init error, incompatible browser.</canvas>
+	</div>
+</div>
+<div id="dataTracking" style="border:3px double #770000; height:100px;"></div>
+</body>
+</html>
