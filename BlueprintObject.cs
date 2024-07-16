@@ -578,8 +578,8 @@ public class FullBpTreeCollection
 		this.tree = [];
 		//this.wireList = [];
 		this.BpTreeVM = [];
-		this.BpTreeVM.Add("Panels",new Dictionary<string,dynamic>{});
-		this.BpTreeVM.Add("Wires",new Dictionary<string,dynamic>{});
+		this.BpTreeVM.Add("Panels", new Dictionary<string,dynamic>{});
+		this.BpTreeVM.Add("Wires", new Dictionary<string,dynamic>{});
 
 		if (bpFlatData is not null){
 			BranchTree(bpFlatData);

@@ -19,10 +19,10 @@ public interface IDataTransfer{
     BlueprintObject? IngestedBpObject { get; set; }
     Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; }
     FullBpTreeCollection? FullBpTree { get; set; } 
-    List<double> NewLinkLineParameters { get; set; }
-    Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; }
-    PathFigure NewLinkPathFigure { get; set; }
-    BezierSegment NewLinkBezierSegment { get; set; }
+    List<double> NewLinkLineParameters { get; set; } //Parameters of a currently generated link line - to be transferred to linkList: 
+    Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; } // any Bezier curve segment requires a Figure, Segment, and Path
+    PathFigure NewLinkPathFigure { get; set; }  // any Bezier curve segment requires a Figure, Segment, and Path
+    BezierSegment NewLinkBezierSegment { get; set; } // any Bezier curve segment requires a Figure, Segment, and Path
 }
 
 public class DataTransfer : IDataTransfer

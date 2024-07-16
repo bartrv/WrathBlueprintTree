@@ -198,7 +198,6 @@ public partial class TreeBuilder : TreePage
 		int panelWidth = (int)ColOne.Width.Value + (int)ColTwo.Width.Value + (int)ColThree.Width.Value;
 		int panelHeight = 36;
 
-		//Frame bpFrameContainer = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Overall Frame container
 		Border bpFrameContainer = new Border{BackgroundColor = Color.FromRgba("#EEEEEE77"), //Overall Frame container
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
@@ -206,17 +205,12 @@ public partial class TreeBuilder : TreePage
 										};
 		AbsoluteLayout bpFrameContainerAbsLayout = [];
 		
-		//Frame bpFrameVisualMain = new Frame{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
 		Border bpFrameVisualMain = new Border{BackgroundColor = Color.FromRgba("#EEEEEEFF"), //Visual Frame container
 										StyleId = PanelBpUniqueName,
 										Margin = new Thickness(0,2),
 										Padding = new Thickness(0,0),
-										//CornerRadius = 3 Frame Styling Option
-										//Stroke = Color.FromRgba("#333333FF"),
-										//Stroke = Color.FromRgba(XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderColor"]),
 										Stroke = panelData["stroke"],
-										//StrokeThickness = 2,
-										//StrokeThickness = XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderWidth"],
+
 										StrokeThickness = panelData["strokeThickness"],
 										StrokeShape = new RoundRectangle
 											{
@@ -227,15 +221,15 @@ public partial class TreeBuilder : TreePage
 										};
 		Ellipse bpAnchorLinkNode = new Ellipse{};
 		bpAnchorLinkNode.SetDynamicResource(VisualElement.StyleProperty, "NodeBlank"); //Assign XAML style template to node Ellipse
+		
 		// set up Drag gesture to fire the link line generation
 		DragGestureRecognizer AnchorNodeDragGesture = new();
 		AnchorNodeDragGesture.DragStarting += (sender, e) => OnDragStarting(sender, e, PanelBpUniqueName, "AnchorNodeStart"); 
-		//Attach (Add) Drag Gesture definition and actions to current Node
-		bpAnchorLinkNode.GestureRecognizers.Add(AnchorNodeDragGesture);
-		AbsoluteLayout.SetLayoutBounds(bpAnchorLinkNode, new Rect(0,0,16,16));
+		bpAnchorLinkNode.GestureRecognizers.Add(AnchorNodeDragGesture); //Attach (Add) Drag Gesture definition and actions to current Node
+		
+		AbsoluteLayout.SetLayoutBounds(bpAnchorLinkNode, new Rect(0,0,16,16)); //Ellipse element will not position/display properly without SetLayoutBounds
 		AbsoluteLayout.SetLayoutFlags(bpAnchorLinkNode, AbsoluteLayoutFlags.None); //suggested byChatGPT  I had assumed this was default behavior - Perhapse only relevant to using the Ellipse element
-
-						
+					
 		//Add Tap Gesture Recognizer (mouse Click) to each panel for panel selection code
 		TapGestureRecognizer TapClickEvent = new TapGestureRecognizer();
 		TapClickEvent.Tapped += (s,e) => {TreePage.OnMouseClick_TreeView(s, e);};
