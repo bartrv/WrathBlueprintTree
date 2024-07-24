@@ -1,3 +1,5 @@
+This codebase uses C# .Net MAUI TargetFramework = net8.0-windows10.0.19041.0
+
 The purpose of this application is to de-mystify Owlcat's Blueprint Modification Template Mod development experience.
 In the mods I have created, most of my issues stem from:
 1. Consistency - user error while hand coding the json 
