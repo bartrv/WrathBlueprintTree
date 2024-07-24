@@ -1,34 +1,32 @@
-﻿using System.Collections;
+﻿namespace WrathBlueprintTree;
+
+using System;
+using System.Collections;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Windows.Input;
-using System.Xml.Linq;
-//using ABI.System.Collections.Generic;
-using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui;
+using Microsoft.Maui.Controls.Xaml;
 using Microsoft.Maui.Controls.Shapes;
-//using Microsoft.UI.Xaml.Controls;
-//using Windows.Devices.Input;
-using Microsoft.Maui.Animations;
-//using Windows.Media.Capture.Core;
-using Microsoft.Maui.Controls.Platform;
 using Microsoft.Maui.Layouts;
-//using Microsoft.UI.Xaml.Input;
-//using Microsoft.Maui.Graphics.Win2D;
-//using Windows.UI.Notifications;
 
-namespace WrathBlueprintTree;
 
+
+ [XamlCompilation(XamlCompilationOptions.Compile)]
 public partial class TreePage : ContentPage
 {
 	IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 
 	Point? relativeToContainerPosition;
 
+	private static Queue TreeQueue = new();
+
+	public static bool IsShiftPressed { get; private set; }
+    public static bool IsControlPressed { get; private set; }
+    public static bool IsAltPressed { get; private set; }
+
 	public TreePage()
 	{
 		InitializeComponent();
+
         //Button buttonAA = new Button {Text = "Button text"};
         //int btnI = 0;
         int ButtonCount = BlueprintModels.ModelDictionary.Count;
@@ -56,52 +54,161 @@ public partial class TreePage : ContentPage
 			XferObject.IsNew = true;
 			XferObject.IsSaved = false;
 		}
-		XferObject.NewLinkPathFigure = new();
-		PathGeometry pathGeometry = new();
-    	//Microsoft.Maui.Controls.Shapes.Path newLinkDragPath = new();
-		//Point newLinkStartPoint = new Point(0, 0);
-		XferObject.NewLinkPath = new();
-		XferObject.NewLinkBezierSegment = new();
-		//BezierSegment newLinkBezierSegment = new();
-		pathGeometry.Figures.Add(XferObject.NewLinkPathFigure);
+		(Microsoft.Maui.Controls.Shapes.Path newLinkLine, Guid newLinkPathId) = Links.InitNew(null,null);
 
-		// Add the PathGeometry to a Path element
-		//var path = new Microsoft.Maui.Controls.Shapes.Path { 
-		//	Data = pathGeometry,
-		//	Stroke = Colors.Black,
-        //    StrokeThickness = 2
-		//	};
-		XferObject.NewLinkPath.Data = pathGeometry;
-		XferObject.NewLinkPath.Stroke = Colors.Black;
-		XferObject.NewLinkPath.StrokeThickness = 2;
+		/* Int code moved to -> Links.InitNew()
 
-		//AbsoluteLayout.SetLayoutBounds(path, new Rect(0,0,200,200));
-		AbsoluteLayout.SetLayoutFlags(XferObject.NewLinkPath, AbsoluteLayoutFlags.None);
-		TreeDropContainer.Children.Add(XferObject.NewLinkPath);
-
-		// Create a BezierSegment
-		//var bezierSegment = new BezierSegment
-		//{
-		//	Point1 = new Point(50, 50),
-		//	Point2 = new Point(100, 0),
-		//	Point3 = new Point(150, 50)
-		//};
-		XferObject.NewLinkLineParameters = [0,0,0,50,10,50,50,100,50];
-
-		XferObject.NewLinkPathFigure.StartPoint = new Point(XferObject.NewLinkLineParameters[1],XferObject.NewLinkLineParameters[2]);
-		XferObject.NewLinkPathFigure.Segments.Add(XferObject.NewLinkBezierSegment);
-		//newLinkStartPoint = new Point(0,0);
-		XferObject.NewLinkBezierSegment.Point1 = new Point(XferObject.NewLinkLineParameters[3],XferObject.NewLinkLineParameters[4]);
-		XferObject.NewLinkBezierSegment.Point2 = new Point(XferObject.NewLinkLineParameters[5],XferObject.NewLinkLineParameters[6]);
-		XferObject.NewLinkBezierSegment.Point3 = new Point(XferObject.NewLinkLineParameters[7],XferObject.NewLinkLineParameters[8]);
-
+			This is a testing block that draws a single bezier curve in the upper left forner of the treepanel frame/Border 
+		    It was originally developed as a straight draw, See commented code
+		    It was then converted to a list pointer referance so the point() definitions could be modified in place and referanced to ensure location consistancy
 		
+			XferObject.NewLinkPathFigure = new();
+			PathGeometry pathGeometry = new();
+			//Microsoft.Maui.Controls.Shapes.Path newLinkDragPath = new();
+			//Point newLinkStartPoint = new Point(0, 0);
+			XferObject.NewLinkPath = new();
+			XferObject.NewLinkBezierSegment = new();
+			//BezierSegment newLinkBezierSegment = new();
+			pathGeometry.Figures.Add(XferObject.NewLinkPathFigure);
+
+			// Add the PathGeometry to a Path element
+			//var path = new Microsoft.Maui.Controls.Shapes.Path { 
+			//	Data = pathGeometry,
+			//	Stroke = Colors.Black,
+			//    StrokeThickness = 2
+			//	};
+			XferObject.NewLinkPath.Data = pathGeometry;
+			XferObject.NewLinkPath.Stroke = Colors.Black;
+			XferObject.NewLinkPath.StrokeThickness = 2;
+
+			//AbsoluteLayout.SetLayoutBounds(path, new Rect(0,0,200,200));
+			AbsoluteLayout.SetLayoutFlags(XferObject.NewLinkPath, AbsoluteLayoutFlags.None);
+		*/
+
+		//TreeDropContainer.Children.Add(XferObject.NewLinkPath);
+		//Guid NewLinkPathId = XferObject.NewLinkPath.Id;
+		//string NewLinkPathIdAsString = NewLinkPathId.ToString();
+		TreeDropContainer.Children.Add(newLinkLine);
+		string NewLinkPathIdAsString = newLinkPathId.ToString();
+
+		/* moved to -> Links.DefineNewPathParameters
+			// Create a BezierSegment
+			//var bezierSegment = new BezierSegment
+			//{
+			//	Point1 = new Point(50, 50),
+			//	Point2 = new Point(100, 0),
+			//	Point3 = new Point(150, 50)
+			//};
+			XferObject.NewLinkLineParameters = [0,0,0,50,10,50,50,100,50];
+
+			XferObject.NewLinkPathFigure.StartPoint = new Point(XferObject.NewLinkLineParameters[1],XferObject.NewLinkLineParameters[2]);
+			XferObject.NewLinkPathFigure.Segments.Add(XferObject.NewLinkBezierSegment);
+			//newLinkStartPoint = new Point(0,0);
+			XferObject.NewLinkBezierSegment.Point1 = new Point(XferObject.NewLinkLineParameters[3],XferObject.NewLinkLineParameters[4]);
+			XferObject.NewLinkBezierSegment.Point2 = new Point(XferObject.NewLinkLineParameters[5],XferObject.NewLinkLineParameters[6]);
+			XferObject.NewLinkBezierSegment.Point3 = new Point(XferObject.NewLinkLineParameters[7],XferObject.NewLinkLineParameters[8]);
+		*/
+
+		Links.DefineNewPathParameters(NewLinkPathIdAsString, 0, 0, 0, 50, 10, 50, 50, 100, 50);
+
+		/* Moved to --> Links.EmitNewPathToLinkList
+		//Init WireTest Bezier Curve definition in XferObject.FullBpTree.BpTreeVM["Wires"] dictionary
+		XferObject.FullBpTree.BpTreeVM["Wires"].Add(NewLinkPathIdAsString, new Dictionary<string,dynamic>{
+			{"Guid", newLinkPathId},
+			{"ParentPanelId", ""},
+			{"ParentPanelNodeId", ""},
+			{"AnchorPanelId", ""},
+			{"NodeList", new Dictionary<string,List<double>>{
+				{"Point0", [0,0]},
+				{"Point1", [0,0]},
+				{"Point2", [0,0]},
+				{"Point3", [0,0]},
+			}}
+		});
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"].add("ParentPanelId", "");
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"].add("ParentPanelNodeId", "");
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"].add("AnchorPanelId", "");
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"].add("ParentPanelNodeId", "");
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"].add("NodeList", new Dictionary<string,List<int,int>>());
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"]["NodeList"].add("Point0",[0,0]);
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"]["NodeList"].add("Point1",[0,0]);
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"]["NodeList"].add("Point2",[0,0]);
+		//XferObject.FullBpTree.BpTreeVM["Wires"]["wireTest"]["NodeList"].add("Point3",[0,0]);
+
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["ParentPanelId"] = "None";
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["ParentPanelNodeId"] = "None";
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["AnchorPanelId"] = "None";
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point0"][0] = XferObject.NewLinkLineParameters[1];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point0"][1] = XferObject.NewLinkLineParameters[2];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point1"][0] = XferObject.NewLinkLineParameters[3];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point1"][1] = XferObject.NewLinkLineParameters[4];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point2"][0] = XferObject.NewLinkLineParameters[5];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point2"][1] = XferObject.NewLinkLineParameters[6];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point3"][0] = XferObject.NewLinkLineParameters[7];
+		XferObject.FullBpTree.BpTreeVM["Wires"][NewLinkPathIdAsString]["NodeList"]["Point3"][1] = XferObject.NewLinkLineParameters[8];
+		*/
+
+		Links.EmitNewPathToLinkList(NewLinkPathIdAsString);
+	}
+
+	// Chat Kbd Low Level Start
+	public static void OnKeyboardKeyPressed(object? sender, KeyEventArgs e)
+	{
+		switch(e.KeyCode)
+		{
+			case 0xA0:
+			case 0xA1:
+				IsShiftPressed = true; // Set a flag or perform an action indicating that Shift(L || R) is pressed
+				break;
+			case 0xA2:
+			case 0xA3:
+				IsControlPressed = true; // Set a flag or perform an action indicating that Control(L || R) is pressed
+				break;
+			case 0xA4:
+			case 0xA5:
+				IsAltPressed = true; // Set a flag or perform an action indicating that Control(L || R) is pressed
+				Console.WriteLine("Alt-Down");
+				break;
+		}
+	}
+
+	public static void OnKeyboardKeyReleased(object? sender, KeyEventArgs e)
+	{	
+		switch(e.KeyCode)
+		{
+			case 0xA0:
+			case 0xA1:
+				IsShiftPressed = false; // Set a flag or perform an action indicating that Shift(L || R) is pressed
+				break;
+			case 0xA2:
+			case 0xA3:
+				IsControlPressed = false; // Reset the flag or perform an action indicating that Control is released
+				break;
+			case 0xA4:
+			case 0xA5:
+				IsAltPressed = false; // Set a flag or perform an action indicating that Alt(L || R) is pressed
+				Console.WriteLine("Alt-Up");
+				break;
+		}
+	}
+	//Chat Kbd Low Level End
+
+	private void KeyHandler_Esc(object sender, System.EventArgs e)
+	{
+		Console.WriteLine("You just pressed : Escape");
+	}
+
+	private void KeyHandler_Del(object sender, System.EventArgs e)
+	{
+		Console.WriteLine("You just pressed : Delete");
 	}
 
 	async public static void ThrowAlert()
 	{
 			bool x =  await Application.Current.MainPage.DisplayAlert("Title","GenerateTreeFromFileData failed","OK","NotOK");
 	}
+
+	
 	private void generateTreePageButtonList()
 	{
 		//Build the button list - Currently everything in the model(W.i.P), will need sub categories eventually
@@ -153,12 +260,11 @@ public partial class TreePage : ContentPage
         } 
 	}
 
-	public void OnPointerMovedInTreeView(object sender, PointerEventArgs e)
+	public void OnPointerMovedInTreeView(object sender, Microsoft.Maui.Controls.PointerEventArgs e)
 	{
 		relativeToContainerPosition = e.GetPosition((View)sender);
 		Console.WriteLine(relativeToContainerPosition);
 		
-
 		if (XferObject.NewLinkLineParameters[0] != 0)  //When generating a new link line, this manages the Bezier Curve redraw cycle.  
 		{
 			//Console.WriteLine("ScrollView.ContentSize: "+treeScrollView.ContentSize.Width);
@@ -174,7 +280,10 @@ public partial class TreePage : ContentPage
 				XferObject.NewLinkBezierSegment.Point2 = new Point(relativeToContainerPosition.Value.X+50,relativeToContainerPosition.Value.Y);
 			}
 			XferObject.NewLinkBezierSegment.Point3 = new Point(relativeToContainerPosition.Value.X,relativeToContainerPosition.Value.Y);
+		} else {
+
 		}
+
 
 	}
 
@@ -185,7 +294,7 @@ public partial class TreePage : ContentPage
 
 		Console.WriteLine($"Frame dragged! : {bpModelKey}");
 		//Point? mousePanelOffset = new();
-		XferObject.NewLinkLineParameters[0] = 0; //Regardless, the stert of a drag operation should cancel/abore any New Link Line operations already in progress.
+		XferObject.NewLinkLineParameters[0] = 0; //Regardless, the start of a drag operation should cancel/abore any New Link Line operations already in progress.
 		for (int i = 1; i < 8; i++)
 		{
 			XferObject.NewLinkLineParameters[i] = 0;
@@ -211,12 +320,12 @@ public partial class TreePage : ContentPage
 			Console.WriteLine("Node Dragged: MathCheck = "+xCorrection+", "+yCorrection);
 			Point nodeOffsetPoint = GetRelativePositionToTreeLayout(mouseSenderElement, e);
 			e.Data.Properties.Add("Position",nodeOffsetPoint);
-			Links.initTestBezierCurve(sender, e);
+			Links.initTestBezierCurveStart(sender, e);
 			//newLinkStartPoint = new Point(relativeToContainerPosition.Value.X,relativeToContainerPosition.Value.Y);
 			//newLinkStartPoint = new Point(nodeOffsetPoint.Value.X, nodeOffsetPoint.Value.Y);
 			XferObject.NewLinkPathFigure.StartPoint = nodeOffsetPoint;
 			XferObject.NewLinkBezierSegment.Point1 = new Point(nodeOffsetPoint.X+50, nodeOffsetPoint.Y);
-			XferObject.NewLinkLineParameters[0] = (dragItemContext == "LinkNodeStart")? 1 : 2;  //perhapse 0,1,2 -> 0 = do nothing, 1 = lnk node sender, 2 = Anchor node sender
+			XferObject.NewLinkLineParameters[0] = (dragItemContext == "LinkNodeStart")? 1 : 2;  // 0,1,2 -> 0 = do nothing, 1 = link node sender, 2 = Anchor node sender
 			XferObject.NewLinkLineParameters[1] = nodeOffsetPoint.X+xCorrection;
 			XferObject.NewLinkLineParameters[2] = nodeOffsetPoint.Y+yCorrection;
 			XferObject.NewLinkLineParameters[3] = (dragItemContext == "LinkNodeStart")? nodeOffsetPoint.X+50+xCorrection : nodeOffsetPoint.X-50+xCorrection;   //If the sender is a LinkNode, go right, if an Anchor, bezier goes left
@@ -242,7 +351,7 @@ public partial class TreePage : ContentPage
 		return new Point(offsetPoint.Value.X,offsetPoint.Value.Y);
 	}
 
-	public static void OnDragOver(object? sender, DragEventArgs e)
+	public static void OnDragOver(object? sender, DragEventArgs e) //windows default is to gave a "Copy" glyph and text on draging items, this disables those visuals
 	{
 		//e.AcceptedOperation = DataPackageOperation.None; 
 		#if WINDOWS
@@ -251,66 +360,127 @@ public partial class TreePage : ContentPage
 			dragUI.IsGlyphVisible = false;
 		#endif
 
-
 	}
 
 	public static void OnMouseClick_TreeView(object sender, TappedEventArgs e)
 	{
 		IDataTransfer XferObject = DependencyService.Get<IDataTransfer>();
 		//if (sender is ScrollView)
+		Console.WriteLine("sender Type: {0}", sender.GetType().Name);
+		Guid? ShapeId;
+
 		if (sender is AbsoluteLayout)
 		{
+			if (IsControlPressed) 
+			{
+				 Console.WriteLine("Control + Click!! -> AbsoluteLayout"); 
+			} 
+			else if (IsShiftPressed)
+			{
+				Console.WriteLine("Shift + Click!! -> AbsoluteLayout"); 
+			}
+			else if (IsAltPressed) //Alt-Down DOES NOT WORK!!!! this should never be true until window.OnFocus problem is addressed
+			{
+				Console.WriteLine("Alt + Click!! -> AbsoluteLayout"); 
+			}
+			else 
+			{ 
+				Console.WriteLine("Click!! -> AbsoluteLayout"); 
+			}
+
 			ClearPanelSelections(XferObject, sender, "AbsoluteLayout");
+			ClearWireSelections(XferObject, sender, "AbsoluteLayout");
+			ShapeId = CheckDrawStatus(sender as AbsoluteLayout, e);
+			if (ShapeId is not null)
+			{
+				//RemoveLinePath(sender as AbsoluteLayout, ShapeId, XferObject);
+			}
+			
 		} 
 		else if (sender is Border)
 		{
+			
 			ClearPanelSelections(XferObject, sender, "Border");
 			SetPanelSelections(XferObject, sender);
+		} else if (sender is Microsoft.Maui.Controls.Shapes.Path)
+		{
+
 		}
 		Console.WriteLine(sender.ToString());
 		//(sender as Border).Stroke = Color.FromRgba("#990000FF");
 		//(sender as Border).StrokeThickness = 3;
 	}
-	public static void ClearPanelSelections(IDataTransfer XferObject, object sender, string senderType)
-	{
-		//if (sender is AbsoluteLayout parentLayout && parentLayout.AutomationId == "TreeDropContainer")
-		//{
-		//if (senderType == "AbsoluteLayout")
-		//{
-			//TreePage treePageInstance = (sender as VisualElement)?.Parent.Parent.Parent as TreePage;
-			//if (treePageInstance != null)
-			//{
-				//var panels =  XferObject.FullBpTree.BpTreeVM["Panels"] as Dictionary<string,dynamic>;
-				foreach (KeyValuePair<string,dynamic> panelEntry in XferObject.FullBpTree.BpTreeVM["Panels"])
-				//foreach (Dictionary<string,dynamic> panelEntry in panels)
-				{
-					Dictionary<string,dynamic> panelDict = panelEntry.Value as Dictionary<string,dynamic>;
-					//Border panelID = treePageInstance.FindByName<Border>((string)uiPanel.Key);
-					
-					//Border panelObjectContainer = panelDict["GeneratedPanelObject"];
-					//Border panelObjectVisual = panelObjectContainer.FindByName<Border>(panelDict["StyleId"]);
-					Border panelObjectVisual = panelDict["GeneratedViewableObject"];
-					//panelObjectContainer.StrokeThickness = 1;
-					//panelObjectContainer.Stroke = Color.FromRgba("#3333FFFF");
-					panelObjectVisual.StrokeThickness = 1;
-					panelObjectVisual.Stroke = Color.FromRgba("#3333FFFF");
 
-					panelDict["selectState"] = -1;
-					panelDict["strokeThickness"] = 1;
-					panelDict["stroke"] = Color.FromRgba("#3333FFFF");
-				}
-				XferObject.SidePanelContainer.Clear();
-			//}
-		//}
+	public static Guid? CheckDrawStatus(AbsoluteLayout sender, TappedEventArgs e)
+	{
+		if (sender.Children.Count > 0)
+		{
+			for (int childIndex = 0; childIndex < sender.Children.Count; childIndex++) //Look through all Children in ght Tree Frame
+			{
+				Console.WriteLine("sender.Children[{0}]: {1}", childIndex, sender.Children[childIndex]);
+				//Console.WriteLine("TreeDropContainer.Children.Last (sender) = {0}", sender.Children.Last());
+				Shape? checkObjectInfo;
+				//if (sender.Children.Last() is Shape)
+				if (sender.Children[childIndex] is Shape)
+				{
+					checkObjectInfo = sender.Children[childIndex] as Shape;
+					Console.WriteLine("TreeDropContainer.Children.Last (sender) = {0}", checkObjectInfo?.Id);
+					return checkObjectInfo?.Id;
+				} 
+			} 
+		}
+
+		return null;
+
 	}
+
+	public static void RemoveLinePath(AbsoluteLayout sender, Guid? ShapeId, IDataTransfer XferObject)
+	{
+		for (int childIndex = 0; childIndex < sender.Children.Count; childIndex++) //Look through all Children in the main Tree Frame/Border.AbsoluteLayout element
+		{
+			Console.WriteLine("sender.Children[{0}]: {1}", childIndex, sender.Children[childIndex]);
+			if (sender.Children[childIndex] is Shape) // Only look at the Shapes - aka link lines
+			{
+				Shape? childItemShape = sender.Children[childIndex]as Shape; //make sure shape is cast properly as IView/Shape, the default IView does not have an Id property
+				if  (childItemShape?.Id == ShapeId) //Comparison is a Guid object, not a Guid string
+				{
+					sender.Children.Remove(sender.Children[childIndex]); //remove Shape object from layout
+					XferObject.FullBpTree.BpTreeVM["Wires"].Remove(ShapeId.ToString()); //Remove Shape Referance from Wire list
+				}
+			}
+		}
+		
+	}
+
+	private static void ClearWireSelections(IDataTransfer XferObject, object sender, string senderType)
+	{
+		//ToDo
+	}
+
+	private static void ClearPanelSelections(IDataTransfer XferObject, object sender, string senderType)
+	{
+		foreach (KeyValuePair<string,dynamic> panelEntry in XferObject.FullBpTree.BpTreeVM["Panels"])
+		{
+			Dictionary<string,dynamic> panelDict = panelEntry.Value as Dictionary<string,dynamic>;
+			Border panelObjectVisual = panelDict["GeneratedViewableObject"];
+			panelObjectVisual.StrokeThickness = 1;
+			panelObjectVisual.Stroke = Color.FromRgba("#3333FFFF");
+			panelDict["selectState"] = -1;
+			panelDict["strokeThickness"] = 1;
+			panelDict["stroke"] = Color.FromRgba("#3333FFFF");
+		}
+		XferObject.SidePanelContainer.Clear();
+		TreeQueue.Reset("Panels");
+	}
+
 	public static void SetPanelSelections(IDataTransfer XferObject, object sender)
 	{
 		var obj = sender as Border;
+		TreeQueue.AddItem(obj);
+
 		string PanelBpUniqueName = obj.StyleId;
 		
 		XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["selectState"] = 0;
-		//XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderColor"] = Color.FromRgba("#990000FF");
-		//XferObject.FullBpTree.BpTreeVM["Panels"][PanelBpUniqueName]["borderWidth"] = (double)3;
 		Console.WriteLine(PanelBpUniqueName.ToString());
 		obj.Stroke = Color.FromRgba("#990000FF");
 		obj.StrokeThickness = 1;

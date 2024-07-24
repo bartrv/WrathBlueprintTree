@@ -6,6 +6,21 @@
              x:Class="WrathBlueprintTree.TreePage"
              x:Name="thisTreePage">
 
+        <ContentPage.MenuBarItems>
+            <MenuBarItem Text="Edit">
+                <MenuFlyoutItem Text="Escape" Clicked="KeyHandler_Esc">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Escape" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Delete" Clicked="KeyHandler_Del">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+            </MenuBarItem>
+        </ContentPage.MenuBarItems>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220" />
