@@ -18,8 +18,8 @@ public interface IDataTransfer{
     VerticalStackLayout? SidePanelContainer { get; set; }
     BlueprintObject? IngestedBpObject { get; set; }
     Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; }
-    FullBpTreeCollection? FullBpTree { get; set; } 
-    List<double> NewLinkLineParameters { get; set; } //Parameters of a currently generated link line - to be transferred to linkList: 
+    FullBpTreeCollection? FullBpTree { get; set; } //
+    List<double> NewLinkLineParameters { get; set; } //Parameters of a currently generated link line - to be transferred to linkList: state(0/none,1/link,2/anchor),p1(x,y),p2,p3,p4
     Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; } // any Bezier curve segment requires a Figure, Segment, and Path
     PathFigure NewLinkPathFigure { get; set; }  // any Bezier curve segment requires a Figure, Segment, and Path
     BezierSegment NewLinkBezierSegment { get; set; } // any Bezier curve segment requires a Figure, Segment, and Path
@@ -37,30 +37,9 @@ public class DataTransfer : IDataTransfer
     public VerticalStackLayout? SidePanelContainer { get; set; }
     public BlueprintObject? IngestedBpObject { get; set; }
     public Dictionary<string,dynamic> IngestedBpObjectFlat { get; set; } = [];
-    public FullBpTreeCollection? FullBpTree { get; set; }
+    public FullBpTreeCollection? FullBpTree { get; set; } // .FullBpTreeVM(Tree-View Model), .tree(Data model) | .FullBpTreeVm["Wires"] | .FullBpTreeVm["Panels"] | .tree["Guid as string"]
     public List<double> NewLinkLineParameters {get; set;} = new();
     public Microsoft.Maui.Controls.Shapes.Path NewLinkPath { get; set; } = new();
     public PathFigure NewLinkPathFigure { get; set; } = new();
     public BezierSegment NewLinkBezierSegment { get; set; } = new();
-   /*
-    public FullBpTreeCollection? FullBpTree 
-    { 
-        get => _fullBpTree; 
-        set
-        {
-            if (_fullBpTree != value)
-            {
-                _fullBpTree = value;
-                OnPropertyChanged(nameof(FullBpTree));
-            }
-        }
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-    */
 }
